@@ -1,0 +1,23 @@
+{
+  "name": "zarr-js",
+  "version": "1.0.0",
+  "description": "load chunked binary zarr files in javascript",
+  "main": "index.js",
+  "scripts": {
+    "test": "standard index.js && tape test.js | tap-spec"
+  },
+  "author": "freeman-lab",
+  "license": "MIT",
+  "dependencies": {
+    "async": "^2.6.2",
+    "cartesian-product": "^2.1.2",
+    "ndarray": "^1.0.18",
+    "ndarray-ops": "^1.2.2",
+    "ndarray-scratch": "^1.2.0",
+    "pako": "^1.0.10"
+  },
+  "devDependencies": {
+    "tap-spec": "^5.0.0",
+    "tape": "^4.13.0"
+  }
+}
