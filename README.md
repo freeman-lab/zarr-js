@@ -16,7 +16,7 @@ npm install zarr-js
 
 ## example
 
-You need to wrap with a module for making requests. Use [`xhr-request`](https://github.com/Jam3/xhr-request) for remote files in `node` or the `browser`, or `fs.readFile` for local files in `node`. We'll use `fs.readFile` in these examples.
+You need to wrap a module for making requests. Use [`xhr-request`](https://github.com/Jam3/xhr-request) for remote files in `node` or the `browser`, or `fs.readFile` for local files in `node`. We'll use `fs.readFile` in these examples.
 
 The `load` method loads the entire file. 
 
