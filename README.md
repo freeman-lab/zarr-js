@@ -6,8 +6,6 @@
 
 It also appears another attempt at this was recently started [here](https://github.com/gzuidhof/zarr.js)! It seems to aim to be more feature complete, less opinionated, and a bit more complex. It might be better for your needs, check it out.
 
-----------------
-
 ## install
 
 Add to your project with
