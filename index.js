@@ -42,32 +42,14 @@ const zarr = (request) => {
       const metadata = parseMetadata(res)
       const keys = listKeys(metadata)
       metadata.keys = keys
-      const _cache = {}
-      const _loading = {}
-      keys.forEach((k) => {
-        _cache[k] = null
-        _loading[k] = null
-      })
 
       const getChunk = function (k, cb) {
         const key = k.join('.')
         if (!(keys.includes(key))) return cb(new Error('Error: chunk ' + key + ' not found', null))
-        if (_cache[k]) {
-          return cb(null, _cache[k])
-        } else {
-          if (_loading[k]) {
-            const message = 'still loading'
-            return cb(message)
-          } else {
-            _loading[k] = true
-          }
-        }
 
         loader(path + '/' + key, 'arraybuffer', (err, res) => {
           if (err) return cb(err)
           const chunk = parseChunk(res, metadata)
-          if (!_cache[k]) _cache[k] = chunk
-          if (_loading[k]) _loading[k] = false
           cb(null, chunk)
         })
       }
