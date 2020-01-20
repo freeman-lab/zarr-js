@@ -52,15 +52,15 @@ zarr.open('example.zarr', (err, get) => {
 
 There are just three methods
 
-### `zarr.load(uri, [callback])`
+#### `zarr.load(uri, [callback])`
 
 Loads a zarr file and passes the result to the `callback`. If the file contains multiple chunks, they are merged. This is the simplest way to load an array.
 
-### `zarr.open(uri, [callback])`
+#### `zarr.open(uri, [callback])`
 
 Opens a zarr file and passes a function to the `callback` that can then be used to load individual chunks based on their key. This is useful for laziliy loading chunks (e.g. tiles in a map viewer).
 
-### `zarr.openList(uri, [callback])`
+#### `zarr.openList(uri, [callback])`
 
 Loads a list of zarr files and passes a list of functions to the `callback` each of which can be used to load invidiaul chunks based on their key. All the metadata for all files are loaded at the start, so this is useful when lazily loading chunks from multiple sources (e.g. different layers of a map viewer).
 
