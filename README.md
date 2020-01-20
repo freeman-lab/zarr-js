@@ -22,7 +22,7 @@ The `load` method loads the entire file.
 
 ```js
 const fs = require('fs')
-let zarr = require('zarr-js')(fs.readFile)
+const zarr = require('zarr-js')(fs.readFile)
 
 zarr.load('example.zarr', (err, array) => {
   console.log(array.data)
@@ -35,7 +35,7 @@ The `open` method can instead be used to read only the metadata and then load in
 
 ```js
 const fs = require('fs')
-let zarr = require('zarr-js')(fs.readFile)
+const zarr = require('zarr-js')(fs.readFile)
 
 zarr.open('example.zarr', (err, get) => {
   get([0], (err, array) => {
