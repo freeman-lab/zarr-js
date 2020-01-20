@@ -2,9 +2,9 @@
 
 > load chunked binary zarr files in javascript
 
-[zarr](https://zarr.readthedocs.io/en/stable/) is a chunked binary format for storing binary n-dimensional arrays with great support for parallel access in cloud environments. This is a super minimal library for reading zarr files in javascript. It only supports array reading with either no compression or `zlib` compression and `C` order little endian arrays. No support for groups. It returns [`scijs/ndarray`](https://github.com/scijs/ndarray) objects. We're primarily using it for visualization with `regl` and `webgl`.
+[zarr](https://zarr.readthedocs.io/en/stable/) is a chunked binary format for storing n-dimensional arrays with great support for parallel access in cloud environments. This is a super minimal library for reading zarr files in javascript. It only supports array reading with either no compression or `zlib` compression and `C` order little endian arrays. No support for groups. It returns [`scijs/ndarray`](https://github.com/scijs/ndarray) objects. We're primarily using it for visualization with `regl` and `webgl`.
 
-It also appears another attempt at this is as of recently underway [here](https://github.com/gzuidhof/zarr.js)! It seems to aim to be more feature complete, less opinionated, and a bit more complex. It might be better for your needs, check it out.
+It also appears another attempt at this was recently started [here](https://github.com/gzuidhof/zarr.js)! It seems to aim to be more feature complete, less opinionated, and a bit more complex. It might be better for your needs, check it out.
 
 ----------------
 
@@ -22,7 +22,7 @@ You need to wrap with a module for making requests. Use [`xhr-request`](https://
 
 The `load` method loads the entire file. 
 
-```
+```js
 const fs = require('fs')
 let zarr = require('zarr-js')(fs.readFile)
 
@@ -35,7 +35,7 @@ zarr.load('example.zarr', (err, array) => {
 
 The `open` method can instead be used to read only the metadata and then load individual chunks on demand. This is useful in applications where you want to laziliy load chunks, e.g. tiles in a map viewer.
 
-```
+```js
 const fs = require('fs')
 let zarr = require('zarr-js')(fs.readFile)
 
