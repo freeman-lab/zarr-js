@@ -5,6 +5,14 @@ const { parallel } = require('async')
 const pool = require('ndarray-scratch')
 const product = require('cartesian-product')
 
+const Blosc = require('numcodecs/blosc')
+const blosc = new Blosc()
+
+const decoders = new Map()
+  .set('zlib', async c => pako.inflate(c))
+  .set('gzip', async c => pako.ungzip(c))
+  .set('blosc', blosc.decode)
+
 const zarr = (request) => {
   const loader = (src, type, cb) => {
     return request(src, { responseType: type }, (err, data) => {
@@ -23,8 +31,10 @@ const zarr = (request) => {
           loader(path + '/' + k, 'arraybuffer', (err, res) => {
             if (err) return cb(err)
             const result = {}
-            result[k] = parseChunk(res, metadata)
-            cb(null, result)
+            parseChunk(res, metadata).then(chunk => {
+              result[k] = chunk
+              cb(null, result)
+            })
           })
         }
         return fetchChunk
@@ -49,8 +59,7 @@ const zarr = (request) => {
 
         loader(path + '/' + key, 'arraybuffer', (err, res) => {
           if (err) return cb(err)
-          const chunk = parseChunk(res, metadata)
-          cb(null, chunk)
+          parseChunk(res, metadata).then(chunk => cb(null, chunk))
         })
       }
       cb(null, getChunk)
@@ -73,13 +82,12 @@ const zarr = (request) => {
   }
 
   // parse a single zarr chunk
-  const parseChunk = (chunk, metadata) => {
+  const parseChunk = async (chunk, metadata) => {
     if (metadata.compressor) {
-      if (metadata.compressor.id === 'zlib') {
-        chunk = pako.inflate(chunk)
-      } else {
+      if (!decoders.has(metadata.compressor.id)) {
         throw new Error('compressor ' + metadata.compressor.id + ' is not supported')
       }
+      chunk = await decoders.get(metadata.compressor.id)(chunk)
     }
     chunk = new constructors[metadata.dtype](chunk.buffer)
     chunk = ndarray(chunk, metadata.chunks)
