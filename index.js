@@ -112,10 +112,8 @@ const zarr = (request) => {
     })
   }
 
-  const openGroup = (path, cb) => {
-    loader(path + '/.zmetadata', 'text', (err, res) => {
-      if (err) return cb(err)
-      const metadata = parseMetadata(res)
+  const openGroup = (path, cb, metadata) => {
+    const onload = (metadata) => {
       if (!Object.keys(metadata).includes('zarr_consolidated_format')) {
         return cb(new Error('metadata is not consolidated', null))
       }
@@ -132,13 +130,20 @@ const zarr = (request) => {
         })
         cb(null, out, metadata)
       })
-    })
+    }
+    if (metadata) {
+      onload(metadata)
+    } else {
+      loader(path + '/.zmetadata', 'text', (err, res) => {
+        if (err) return cb(err)
+        const metadata = parseMetadata(res)
+        onload(metadata)
+      })
+    }
   }
 
-  const loadGroup = (path, cb, list) => {
-    loader(path + '/.zmetadata', 'text', (err, res) => {
-      if (err) return cb(err)
-      const metadata = parseMetadata(res)
+  const loadGroup = (path, cb, list, metadata) => {
+    const onload = (metadata) => {
       if (!Object.keys(metadata).includes('zarr_consolidated_format')) {
         return cb(new Error('metadata is not consolidated', null))
       }
@@ -156,7 +161,16 @@ const zarr = (request) => {
         })
         cb(null, out, metadata)
       })
-    })
+    }
+    if (metadata) {
+      onload(metadata)
+    } else {
+      loader(path + '/.zmetadata', 'text', (err, res) => {
+        if (err) return cb(err)
+        const metadata = parseMetadata(res)
+        onload(metadata)
+      })
+    }
   }
 
   // parse json metadata

@@ -67,19 +67,19 @@ There are six methods
 
 #### `zarr.load(uri, [callback], [metadata])`
 
-Loads a zarr file and passes the result to the `callback`. If the file contains multiple chunks, they are merged. This is the simplest way to load an array. If for some reason the metadata has already been loaded, it can be passed as an optional third argument to avoid making the request. This is mainly used internally.
+Loads a zarr file and passes the result to the `callback`. If the file contains multiple chunks, they are merged. This is the simplest way to load an array. If metadata has already been loaded, it can be passed as an optional third argument to avoid making the request.
 
 #### `zarr.open(uri, [callback], [metadata])`
 
-Opens a zarr file and passes a function to the `callback` that can then be used to load individual chunks based on their key. This is useful for laziliy loading chunks (e.g. tiles in a map viewer). The result is a function that can be used to load chunks of the array. If for some reason the metadata has already been loaded, it can be passed as an optional third argument to avoid making the request. This is mainly used internally.
+Opens a zarr file and passes a function to the `callback` that can then be used to load individual chunks based on their key. This is useful for laziliy loading chunks (e.g. tiles in a map viewer). The result is a function that can be used to load chunks of the array. If metadata has already been loaded, it can be passed as an optional third argument to avoid making the request.
 
-#### `zarr.openGroup(uri, [callback])`
+#### `zarr.openGroup(uri, [callback], [metadata])`
 
-Opens consolidated metadata for a zarr group, which is typically a collection of zarr arrays. All the metadata for all arrays are loaded at the start, so this is useful when lazily loading chunks from multiple sources (e.g. different layers of a map viewer). The result passed to the `callback` is an object with keys as array names and values as functions that can be used to load chunks.
+Opens consolidated metadata for a zarr group, which is typically a collection of zarr arrays. All the metadata for all arrays are loaded at the start, so this is useful when lazily loading chunks from multiple sources (e.g. different layers of a map viewer). The result passed to the `callback` is an object with keys as array names and values as functions that can be used to load chunks. If metadata has already been loaded, it can be passed as an optional third argument to avoid making the request.
 
-#### `zarr.loadGroup(uri, [callback], [list])`
+#### `zarr.loadGroup(uri, [callback], [list], [metadata])`
 
-Loads consolidated metadata for a zarr group, which is typically a collection of zarr arrays. All the metadata for all arrays are loaded at the start, so this is useful when lazily loading chunks from multiple sources (e.g. different layers of a map viewer). The result passed to the `callback` is an object with keys as array names and values as arrays. An optional list or array names can be passed if you only want to load a subset.
+Loads consolidated metadata for a zarr group, which is typically a collection of zarr arrays. All the metadata for all arrays are loaded at the start, so this is useful when lazily loading chunks from multiple sources (e.g. different layers of a map viewer). The result passed to the `callback` is an object with keys as array names and values as arrays. An optional list of array names can be passed if you only want to load a subset. If metadata has already been loaded, it can be passed as an optional fourth argument to avoid making the request.
 
 #### `zarr.openList(uri, [callback])`
 
