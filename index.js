@@ -22,7 +22,13 @@ const zarr = (request) => {
           cb(new Error('resource not found'))
         }
       })
-      .then(body => cb(null, body))
+      .then(body => {
+        if (!body) {
+          cb(new Error('resource not found'))
+        } else {
+          cb(null, body)
+        }
+      })
   } else {
     loader = (src, type, cb) => request(src, { responseType: type }, (err, data) => {
       if ((err) | (!data)) return cb(new Error('resource not found'))
@@ -138,7 +144,7 @@ const zarr = (request) => {
       }
       const arrays = listArrays(metadata.metadata)
       let keys = Object.keys(arrays)
-      if (list) keys = keys.filter(k => list.includes(k))
+      if (list && list.length > 0) keys = keys.filter(k => list.includes(k))
       const tasks = keys.map((k) => {
         return function (cb) { load(path + '/' + k, cb, arrays[k]) }
       })
