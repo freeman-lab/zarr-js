@@ -112,13 +112,14 @@ const zarr = (request) => {
     })
   }
 
-  const openGroup = (path, cb, metadata) => {
+  const openGroup = (path, cb, list, metadata) => {
     const onload = (metadata) => {
       if (!Object.keys(metadata).includes('zarr_consolidated_format')) {
         return cb(new Error('metadata is not consolidated', null))
       }
       const arrays = listArrays(metadata.metadata)
-      const keys = Object.keys(arrays)
+      let keys = Object.keys(arrays)
+      if (list && list.length > 0) keys = keys.filter(k => list.includes(k))
       const tasks = keys.map((k) => {
         return function (cb) { open(path + '/' + k, cb, arrays[k]) }
       })
