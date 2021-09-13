@@ -122,3 +122,11 @@ test('3d.chunked.mixed.compressed.i2', function (t) {
     t.end()
   })
 })
+
+test('1d.contiguous.compressed.i2.group', function (t) {
+  zarr.loadGroup('data/1d.contiguous.compressed.i2.group.zarr', (err, group) => {
+    t.deepEqual(group.a.data, new Int16Array([1, 2, 3, 4]))
+    t.deepEqual(group.b.data, new Int16Array([5, 6, 7, 8]))
+    t.end()
+  })
+})
