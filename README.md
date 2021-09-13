@@ -83,13 +83,13 @@ Loads consolidated metadata for a zarr group, which is typically a collection of
 
 #### `zarr.openList(uri, [callback])`
 
-_Depracation note: for the majority of cases this same functionality is available through the `openGroup` method combined with the `list` argument so we are planning to remove this method_
+_Depracation note: for the majority of cases this same functionality is available through the `openGroup` method combined with the `list` argument so we are planning to remove this method in the next release_
 
 Opens a list of zarr files and passes a list of functions to the `callback` each of which can be used to load invidiaul chunks based on their key. All the metadata for all files are loaded at the start, so this is useful when lazily loading chunks from multiple sources (e.g. different layers of a map viewer). 
 
 #### `zarr.loadList(uri, [callback])`
 
-_Depracation note: for the majority of cases this same functionality is available through the `loadGroup` method combined with the `list` argument so we are planning to remove this method_
+_Depracation note: for the majority of cases this same functionality is available through the `loadGroup` method combined with the `list` argument so we are planning to remove this method in the next release_
 
 Loads a list of zarr files and passes a list of arrays to the `callback` each of which can be used to load invidiaul chunks based on their key. All the metadata for all files are loaded at the start, so this is useful when lazily loading chunks from multiple sources (e.g. different layers of a map viewer).
 
