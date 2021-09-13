@@ -114,13 +114,14 @@ const zarr = (request) => {
         return cb(new Error('metadata is not consolidated', null))
       }
       const arrays = listArrays(metadata.metadata)
-      const tasks = arrays.map((k) => {
-        return function (cb) { open(path + '/' + k, cb) }
+      const keys = Object.keys(arrays)
+      const tasks = keys.map((k) => {
+        return function (cb) { open(path + '/' + k, cb, arrays[k]) }
       })
       parallel(tasks, (err, result) => {
         if (err) return cb(err)
         const out = {}
-        arrays.forEach((k, i) => {
+        keys.forEach((k, i) => {
           out[k] = result[i]
         })
         cb(null, out, metadata)
@@ -135,15 +136,16 @@ const zarr = (request) => {
       if (!Object.keys(metadata).includes('zarr_consolidated_format')) {
         return cb(new Error('metadata is not consolidated', null))
       }
-      let arrays = listArrays(metadata.metadata)
-      if (list) arrays = arrays.filter(k => list.includes(k))
-      const tasks = arrays.map((k) => {
-        return function (cb) { load(path + '/' + k, cb) }
+      const arrays = listArrays(metadata.metadata)
+      let keys = Object.keys(arrays)
+      if (list) keys = keys.filter(k => list.includes(k))
+      const tasks = keys.map((k) => {
+        return function (cb) { load(path + '/' + k, cb, arrays[k]) }
       })
       parallel(tasks, (err, result) => {
         if (err) return cb(err)
         const out = {}
-        arrays.forEach((k, i) => {
+        keys.forEach((k, i) => {
           out[k] = result[i]
         })
         cb(null, out, metadata)
@@ -204,7 +206,11 @@ const zarr = (request) => {
   // list arrays
   const listArrays = (metadata) => {
     const keys = Object.keys(metadata).filter(k => k.includes('.zarray'))
-    return keys.map(k => k.replace('/.zarray', ''))
+    const out = {}
+    keys.forEach(k => {
+      out[k.replace('/.zarray', '')] = metadata[k]
+    })
+    return out
   }
 
   // list keys of all zarr chunks based on metadata

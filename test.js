@@ -130,3 +130,11 @@ test('1d.contiguous.compressed.i2.group', function (t) {
     t.end()
   })
 })
+
+test('1d.contiguous.compressed.i2.group.list', function (t) {
+  zarr.loadGroup('data/1d.contiguous.compressed.i2.group.zarr', (err, group) => {
+    t.deepEqual(group.a.data, new Int16Array([1, 2, 3, 4]))
+    t.equal(group.b, undefined)
+    t.end()
+  }, ['a'])
+})
