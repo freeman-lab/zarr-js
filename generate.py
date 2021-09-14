@@ -69,3 +69,10 @@ z = zarr.array(arange(27).reshape(3,3,3), dtype='i2', store=store, chunks=(1,1,1
 # 3d.chunked.mixed.compressed
 store = zarr.DirectoryStore('data/3d.chunked.mixed.compressed.i2.zarr')
 z = zarr.array(arange(27).reshape(3,3,3), dtype='i2', store=store, chunks=(3,3,1), compressor=Zlib())
+
+# 1d.contiguous.compressed.i2.group
+store = zarr.DirectoryStore('data/1d.contiguous.compressed.i2.group.zarr')
+root = zarr.open(store=store, mode='w')
+root.array('a', [1, 2, 3, 4], dtype='i2', chunks=(4,), compressor=Zlib())
+root.array('b', [5, 6, 7, 8], dtype='i2', chunks=(4,), compressor=Zlib())
+zarr.consolidate_metadata(store)

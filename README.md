@@ -16,7 +16,7 @@ npm install zarr-js
 
 ## example
 
-You need to wrap a module for making requests. Use [`xhr-request`](https://github.com/Jam3/xhr-request) for remote files in `node` or the `browser`, or `fs.readFile` for local files in `node`. We'll use `fs.readFile` in these examples.
+You need to wrap a module for making requests. For most use cases in the browser you can use `fetch`, which is the default if nothing is passed. You can also use [`xhr-request`](https://github.com/Jam3/xhr-request) for remote files in `node` or the `browser`, or `fs.readFile` for local files in `node`. We'll use `fs.readFile` in these examples.
 
 The `load` method loads the entire file. 
 
@@ -46,21 +46,53 @@ zarr.open('example.zarr', (err, get) => {
 >> Int16Array [ 1, 2, 3, 4 ]
 ```
 
+The `loadGroup` and `openGroup` are similar but work on `zarr` groups with consolidated metadata. These are hierarchical data structures typically used to store multiple related arrays.
+
+```js
+const fs = require('fs')
+const zarr = require('zarr-js')(fs.readFile)
+
+zarr.loadGroup('example_group.zarr', (err, group) => {
+  console.log(group.a.data)
+  console.log(group.b.data)
+})
+
+>> Int16Array [ 1, 2, 3, 4 ]
+>> Int16Array [ 5, 6, 7, 8 ]
+```
+
 ## api
 
-There are just three methods
+There are six methods
 
-#### `zarr.load(uri, [callback])`
+#### `zarr.load(uri, [callback], [metadata])`
 
-Loads a zarr file and passes the result to the `callback`. If the file contains multiple chunks, they are merged. This is the simplest way to load an array.
+Loads a zarr file and passes the result to the `callback`. If the file contains multiple chunks, they are merged. This is the simplest way to load an array. If metadata has already been loaded, it can be passed as an optional third argument to avoid making the request.
 
-#### `zarr.open(uri, [callback])`
+#### `zarr.open(uri, [callback], [metadata])`
 
-Opens a zarr file and passes a function to the `callback` that can then be used to load individual chunks based on their key. This is useful for laziliy loading chunks (e.g. tiles in a map viewer).
+Opens a zarr file and passes a function to the `callback` that can then be used to load individual chunks based on their key. This is useful for laziliy loading chunks (e.g. tiles in a map viewer). The result is a function that can be used to load chunks of the array. If metadata has already been loaded, it can be passed as an optional third argument to avoid making the request.
+
+#### `zarr.openGroup(uri, [callback], [list], [metadata])`
+
+Opens consolidated metadata for a zarr group, which is typically a collection of zarr arrays. All the metadata for all arrays are loaded at the start, so this is useful when lazily loading chunks from multiple sources (e.g. different layers of a map viewer). The result passed to the `callback` is an object with keys as array names and values as functions that can be used to load chunks. An optional list of array names can be passed if you only want to return a subset of keys. If metadata has already been loaded, it can be passed as an optional third argument to avoid making the request.
+
+#### `zarr.loadGroup(uri, [callback], [list], [metadata])`
+
+Loads consolidated metadata for a zarr group, which is typically a collection of zarr arrays. All the metadata for all arrays are loaded at the start, so this is useful when lazily loading chunks from multiple sources (e.g. different layers of a map viewer). The result passed to the `callback` is an object with keys as array names and values as arrays. An optional list of array names can be passed if you only want to load a subset. If metadata has already been loaded, it can be passed as an optional fourth argument to avoid making the request.
 
 #### `zarr.openList(uri, [callback])`
 
-Loads a list of zarr files and passes a list of functions to the `callback` each of which can be used to load invidiaul chunks based on their key. All the metadata for all files are loaded at the start, so this is useful when lazily loading chunks from multiple sources (e.g. different layers of a map viewer).
+_Depracation note: for the majority of cases this same functionality is available through the `openGroup` method combined with the `list` argument so we are planning to remove this method in the next release_
+
+Opens a list of zarr files and passes a list of functions to the `callback` each of which can be used to load invidiaul chunks based on their key. All the metadata for all files are loaded at the start, so this is useful when lazily loading chunks from multiple sources (e.g. different layers of a map viewer). 
+
+#### `zarr.loadList(uri, [callback])`
+
+_Depracation note: for the majority of cases this same functionality is available through the `loadGroup` method combined with the `list` argument so we are planning to remove this method in the next release_
+
+Loads a list of zarr files and passes a list of arrays to the `callback` each of which can be used to load invidiaul chunks based on their key. All the metadata for all files are loaded at the start, so this is useful when lazily loading chunks from multiple sources (e.g. different layers of a map viewer).
+
 
 ## tests
 

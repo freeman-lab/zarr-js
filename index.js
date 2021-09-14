@@ -6,17 +6,38 @@ const pool = require('ndarray-scratch')
 const product = require('cartesian-product')
 
 const zarr = (request) => {
-  const loader = (src, type, cb) => {
-    return request(src, { responseType: type }, (err, data) => {
-      if ((err) | (!data)) return cb(new Error('Error: resource not found'))
+  let loader
+  request = request || (window.fetch ? window.fetch : null)
+  if (!request) throw new Error('no request function defined')
+  if (request.name === 'fetch') {
+    loader = (src, type, cb) => request(src)
+      .then(response => {
+        if (response.status === 200) {
+          if (type === 'text') {
+            return response.text()
+          } else if (type === 'arraybuffer') {
+            return response.arrayBuffer()
+          }
+        } else {
+          cb(new Error('resource not found'))
+        }
+      })
+      .then(body => {
+        if (!body) {
+          cb(new Error('resource not found'))
+        } else {
+          cb(null, body)
+        }
+      })
+  } else {
+    loader = (src, type, cb) => request(src, { responseType: type }, (err, data) => {
+      if ((err) | (!data)) return cb(new Error('resource not found'))
       return cb(null, data)
     })
   }
 
-  const load = (path, cb) => {
-    loader(path + '/.zarray', 'text', (err, res) => {
-      if (err) return cb(err)
-      const metadata = parseMetadata(res)
+  const load = (path, cb, metadata) => {
+    const onload = (metadata) => {
       const keys = listKeys(metadata)
       const tasks = keys.map((k) => {
         const fetchChunk = (cb) => {
@@ -33,20 +54,25 @@ const zarr = (request) => {
         if (err) return cb(err)
         cb(null, mergeChunks(chunks, metadata))
       })
-    })
+    }
+    if (metadata) {
+      onload(metadata)
+    } else {
+      loader(path + '/.zarray', 'text', (err, res) => {
+        if (err) return cb(err)
+        const metadata = parseMetadata(res)
+        onload(metadata)
+      })
+    }
   }
 
-  const open = (path, cb) => {
-    loader(path + '/.zarray', 'text', (err, res) => {
-      if (err) return cb(err)
-      const metadata = parseMetadata(res)
+  const open = (path, cb, metadata) => {
+    const onload = (metadata) => {
       const keys = listKeys(metadata)
       metadata.keys = keys
-
       const getChunk = function (k, cb) {
         const key = k.join('.')
-        if (!(keys.includes(key))) return cb(new Error('Error: chunk ' + key + ' not found', null))
-
+        if (!(keys.includes(key))) return cb(new Error('chunk ' + key + ' not found', null))
         loader(path + '/' + key, 'arraybuffer', (err, res) => {
           if (err) return cb(err)
           const chunk = parseChunk(res, metadata)
@@ -54,7 +80,16 @@ const zarr = (request) => {
         })
       }
       cb(null, getChunk)
-    })
+    }
+    if (metadata) {
+      onload(metadata)
+    } else {
+      loader(path + '/.zarray', 'text', (err, res) => {
+        if (err) return cb(err)
+        const metadata = parseMetadata(res)
+        onload(metadata)
+      })
+    }
   }
 
   const openList = (list, cb) => {
@@ -65,6 +100,78 @@ const zarr = (request) => {
       if (err) return cb(err)
       cb(null, result)
     })
+  }
+
+  const loadList = (list, cb) => {
+    const tasks = list.map((k) => {
+      return function (cb) { load(k, cb) }
+    })
+    parallel(tasks, (err, result) => {
+      if (err) return cb(err)
+      cb(null, result)
+    })
+  }
+
+  const openGroup = (path, cb, list, metadata) => {
+    const onload = (metadata) => {
+      if (!Object.keys(metadata).includes('zarr_consolidated_format')) {
+        return cb(new Error('metadata is not consolidated', null))
+      }
+      const arrays = listArrays(metadata.metadata)
+      let keys = Object.keys(arrays)
+      if (list && list.length > 0) keys = keys.filter(k => list.includes(k))
+      const tasks = keys.map((k) => {
+        return function (cb) { open(path + '/' + k, cb, arrays[k]) }
+      })
+      parallel(tasks, (err, result) => {
+        if (err) return cb(err)
+        const out = {}
+        keys.forEach((k, i) => {
+          out[k] = result[i]
+        })
+        cb(null, out, metadata)
+      })
+    }
+    if (metadata) {
+      onload(metadata)
+    } else {
+      loader(path + '/.zmetadata', 'text', (err, res) => {
+        if (err) return cb(err)
+        const metadata = parseMetadata(res)
+        onload(metadata)
+      })
+    }
+  }
+
+  const loadGroup = (path, cb, list, metadata) => {
+    const onload = (metadata) => {
+      if (!Object.keys(metadata).includes('zarr_consolidated_format')) {
+        return cb(new Error('metadata is not consolidated', null))
+      }
+      const arrays = listArrays(metadata.metadata)
+      let keys = Object.keys(arrays)
+      if (list && list.length > 0) keys = keys.filter(k => list.includes(k))
+      const tasks = keys.map((k) => {
+        return function (cb) { load(path + '/' + k, cb, arrays[k]) }
+      })
+      parallel(tasks, (err, result) => {
+        if (err) return cb(err)
+        const out = {}
+        keys.forEach((k, i) => {
+          out[k] = result[i]
+        })
+        cb(null, out, metadata)
+      })
+    }
+    if (metadata) {
+      onload(metadata)
+    } else {
+      loader(path + '/.zmetadata', 'text', (err, res) => {
+        if (err) return cb(err)
+        const metadata = parseMetadata(res)
+        onload(metadata)
+      })
+    }
   }
 
   // parse json metadata
@@ -117,6 +224,16 @@ const zarr = (request) => {
     }
   }
 
+  // list arrays
+  const listArrays = (metadata) => {
+    const keys = Object.keys(metadata).filter(k => k.includes('.zarray'))
+    const out = {}
+    keys.forEach(k => {
+      out[k.replace('/.zarray', '')] = metadata[k]
+    })
+    return out
+  }
+
   // list keys of all zarr chunks based on metadata
   const listKeys = (metadata) => {
     const zipped = []
@@ -152,7 +269,10 @@ const zarr = (request) => {
   return {
     load: load,
     open: open,
-    openList: openList
+    openList: openList,
+    loadList: loadList,
+    openGroup: openGroup,
+    loadGroup: loadGroup
   }
 }
 
