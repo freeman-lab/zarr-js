@@ -1,5 +1,5 @@
 const test = require('tape')
-const fs = require('fs')
+const fs = require('fs/promises')
 const zarr = require('./index')(fs.readFile)
 
 test('1d.chunked.compressed.i2', function (t) {
