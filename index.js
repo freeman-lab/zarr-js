@@ -12,7 +12,12 @@ const zarr = (request) => {
   if (!request) throw new Error('no request function defined')
 
   const loader = async (src, type, cb) => {
-    const response = await request(src)
+    let response
+    try {
+      response = await request(src)
+    } catch (err) {
+      return cb(new Error('error evaluating fetching function'))
+    }
     if (response && Buffer.isBuffer(response)) {
       return cb(null, response)
     } else {
