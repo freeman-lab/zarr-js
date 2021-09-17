@@ -6,34 +6,34 @@ const pool = require('ndarray-scratch')
 const product = require('cartesian-product')
 
 const zarr = (request) => {
-  let loader
-  request = request || (window.fetch ? window.fetch : null)
+  if (!request) {
+    request = window.fetch
+  }
   if (!request) throw new Error('no request function defined')
-  if (request.name === 'fetch') {
-    loader = (src, type, cb) => request(src)
-      .then(response => {
-        if (response.status === 200) {
-          if (type === 'text') {
-            return response.text()
-          } else if (type === 'arraybuffer') {
-            return response.arrayBuffer()
-          }
+
+  const loader = async (src, type, cb) => {
+    const response = await request(src)
+    if (response && Buffer.isBuffer(response)) {
+      return cb(null, response)
+    } else {
+      if (response?.status === 200) {
+        let body
+        if (type === 'text') {
+          body = await response.text()
+        } else if (type === 'arraybuffer') {
+          body = await response.arrayBuffer()
         } else {
-          cb(new Error('resource not found'))
+          return cb(new Error('unsupported file format'))
         }
-      })
-      .then(body => {
         if (!body) {
-          cb(new Error('resource not found'))
+          return cb(new Error('failed to parse data'))
         } else {
-          cb(null, body)
+          return cb(null, body)
         }
-      })
-  } else {
-    loader = (src, type, cb) => request(src, { responseType: type }, (err, data) => {
-      if ((err) | (!data)) return cb(new Error('resource not found'))
-      return cb(null, data)
-    })
+      } else {
+        return cb(new Error('resource not found'))
+      }
+    }
   }
 
   const load = (path, cb, metadata) => {
