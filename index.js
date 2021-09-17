@@ -97,26 +97,6 @@ const zarr = (request) => {
     }
   }
 
-  const openList = (list, cb) => {
-    const tasks = list.map((k) => {
-      return function (cb) { open(k, cb) }
-    })
-    parallel(tasks, (err, result) => {
-      if (err) return cb(err)
-      cb(null, result)
-    })
-  }
-
-  const loadList = (list, cb) => {
-    const tasks = list.map((k) => {
-      return function (cb) { load(k, cb) }
-    })
-    parallel(tasks, (err, result) => {
-      if (err) return cb(err)
-      cb(null, result)
-    })
-  }
-
   const openGroup = (path, cb, list, metadata) => {
     const onload = (metadata) => {
       if (!Object.keys(metadata).includes('zarr_consolidated_format')) {
@@ -274,8 +254,6 @@ const zarr = (request) => {
   return {
     load: load,
     open: open,
-    openList: openList,
-    loadList: loadList,
     openGroup: openGroup,
     loadGroup: loadGroup
   }

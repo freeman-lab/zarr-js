@@ -18,7 +18,7 @@ npm install zarr-js
 
 You need to wrap a module for making async requests. For most use cases in the browser you can use `fetch`, which is the default if nothing is passed. You can also use `fsPromises.readFile` for local files in `node`. We'll use `fsPromises.readFile` in these examples.
 
-The `load` method loads the entire file. 
+The `load` method loads the entire array. 
 
 ```js
 const fs = require('fs/promises')
@@ -63,7 +63,7 @@ zarr.loadGroup('example_group.zarr', (err, group) => {
 
 ## api
 
-There are six methods
+There are just four methods
 
 #### `zarr.load(uri, [callback], [metadata])`
 
@@ -73,26 +73,13 @@ Loads a zarr file and passes the result to the `callback`. If the file contains 
 
 Opens a zarr file and passes a function to the `callback` that can then be used to load individual chunks based on their key. This is useful for laziliy loading chunks (e.g. tiles in a map viewer). The result is a function that can be used to load chunks of the array. If metadata has already been loaded, it can be passed as an optional third argument to avoid making the request.
 
-#### `zarr.openGroup(uri, [callback], [list], [metadata])`
-
-Opens consolidated metadata for a zarr group, which is typically a collection of zarr arrays. All the metadata for all arrays are loaded at the start, so this is useful when lazily loading chunks from multiple sources (e.g. different layers of a map viewer). The result passed to the `callback` is an object with keys as array names and values as functions that can be used to load chunks. An optional list of array names can be passed if you only want to return a subset of keys. If metadata has already been loaded, it can be passed as an optional third argument to avoid making the request.
-
 #### `zarr.loadGroup(uri, [callback], [list], [metadata])`
 
-Loads consolidated metadata for a zarr group, which is typically a collection of zarr arrays. All the metadata for all arrays are loaded at the start, so this is useful when lazily loading chunks from multiple sources (e.g. different layers of a map viewer). The result passed to the `callback` is an object with keys as array names and values as arrays. An optional list of array names can be passed if you only want to load a subset. If metadata has already been loaded, it can be passed as an optional fourth argument to avoid making the request.
+Loads all arrays with consolidated metadata from a zarr group, which is typically a collection of related arrays. The result passed to the `callback` is an object with keys as array names and values as arrays. An optional list of array names can be passed if you know you only want to load a subset. If metadata has already been loaded, it can be passed as an optional fourth argument to avoid making the request.
 
-#### `zarr.openList(uri, [callback])`
+#### `zarr.openGroup(uri, [callback], [list], [metadata])`
 
-_Depracation note: for the majority of cases this same functionality is available through the `openGroup` method combined with the `list` argument so we are planning to remove this method in the next release_
-
-Opens a list of zarr files and passes a list of functions to the `callback` each of which can be used to load invidiaul chunks based on their key. All the metadata for all files are loaded at the start, so this is useful when lazily loading chunks from multiple sources (e.g. different layers of a map viewer). 
-
-#### `zarr.loadList(uri, [callback])`
-
-_Depracation note: for the majority of cases this same functionality is available through the `loadGroup` method combined with the `list` argument so we are planning to remove this method in the next release_
-
-Loads a list of zarr files and passes a list of arrays to the `callback` each of which can be used to load invidiaul chunks based on their key. All the metadata for all files are loaded at the start, so this is useful when lazily loading chunks from multiple sources (e.g. different layers of a map viewer).
-
+Opens consolidated metadata for a zarr group, which is typically a collection of related arrays. Only the metadata is loaded, so this is useful when lazily loading chunks from multiple sources. The result passed to the `callback` is an object with keys as array names and values as functions that can be used to load chunks. An optional list of array names can be passed if you only want to return a subset of keys. If metadata has already been loaded, it can be passed as an optional fourth argument to avoid making the request.
 
 ## tests
 
