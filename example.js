@@ -1,4 +1,4 @@
-const fs = require('fs/promises')
+const fs = require('fs')
 const zarr = require('./index.js')(fs.readFile)
 
 // load an entire array

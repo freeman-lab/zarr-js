@@ -2,9 +2,9 @@
 
 > load chunked binary zarr files in javascript
 
-[zarr](https://zarr.readthedocs.io/en/stable/) is a chunked binary format for storing n-dimensional arrays with great support for parallel access in cloud environments. This is a super minimal library for reading zarr files in javascript. It only supports array reading with either no compression or `zlib` compression and `C` order little endian arrays. No support for groups. It returns [`scijs/ndarray`](https://github.com/scijs/ndarray) objects. We're primarily using it for visualization with `regl` and `webgl`.
+[zarr](https://zarr.readthedocs.io/en/stable/) is a chunked binary format for storing n-dimensional arrays with great support for parallel access in cloud environments. This is a minimal library for reading zarr files in javascript. It supports reading arrays with `zlib` compression or no compression and `C` order little endian arrays. It supports both arrays and groups, and you can `load` entire arrays at once or `open` them for lazy loading of chunks. It returns [`scijs/ndarray`](https://github.com/scijs/ndarray) objects.
 
-It also appears another attempt at this was recently started [here](https://github.com/gzuidhof/zarr.js)! It seems to aim to be more feature complete, less opinionated, and a bit more complex. It might be better for your needs, check it out.
+Another similar effort has been developing [here](https://github.com/gzuidhof/zarr.js)! It's more feature complete, supporting both reading and writing arrays, but it's also a heavier dependency. It might be better for your needs, check it out.
 
 ## install
 
@@ -16,12 +16,12 @@ npm install zarr-js
 
 ## example
 
-You need to wrap a module for making requests. For most use cases in the browser you can use `fetch`, which is the default if nothing is passed. You can also use [`xhr-request`](https://github.com/Jam3/xhr-request) for remote files in `node` or the `browser`, or `fs.readFile` for local files in `node`. We'll use `fs.readFile` in these examples.
+You need to wrap a module for making async requests. For most use cases in the browser you can use `fetch`, which is the default if nothing is passed. You can also use `fsPromises.readFile` for local files in `node`. We'll use `fsPromises.readFile` in these examples.
 
 The `load` method loads the entire file. 
 
 ```js
-const fs = require('fs')
+const fs = require('fs/promises')
 const zarr = require('zarr-js')(fs.readFile)
 
 zarr.load('example.zarr', (err, array) => {
@@ -34,7 +34,7 @@ zarr.load('example.zarr', (err, array) => {
 The `open` method can instead be used to read only the metadata and then load individual chunks on demand. This is useful in applications where you want to laziliy load chunks, e.g. tiles in a map viewer.
 
 ```js
-const fs = require('fs')
+const fs = require('fs/promises')
 const zarr = require('zarr-js')(fs.readFile)
 
 zarr.open('example.zarr', (err, get) => {
@@ -49,7 +49,7 @@ zarr.open('example.zarr', (err, get) => {
 The `loadGroup` and `openGroup` are similar but work on `zarr` groups with consolidated metadata. These are hierarchical data structures typically used to store multiple related arrays.
 
 ```js
-const fs = require('fs')
+const fs = require('fs/promises')
 const zarr = require('zarr-js')(fs.readFile)
 
 zarr.loadGroup('example_group.zarr', (err, group) => {
