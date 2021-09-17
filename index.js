@@ -21,7 +21,7 @@ const zarr = (request) => {
     if (response && Buffer.isBuffer(response)) {
       return cb(null, response)
     } else {
-      if (response?.status === 200) {
+      if ((response && response.status) && (response.status === 200)) {
         let body
         if (type === 'text') {
           body = await response.text()
