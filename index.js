@@ -173,13 +173,23 @@ const zarr = (request) => {
         throw new Error('compressor ' + metadata.compressor.id + ' is not supported')
       }
     }
-    chunk = new constructors[metadata.dtype](chunk.buffer)
+    const dtype = metadata.dtype
+    if (dtype.startsWith('|S')) {
+      const length = parseInt(dtype.split('|S')[1])
+      chunk = new constructors['|S'](length, 1)(chunk.buffer)
+    } else if (metadata.dtype.startsWith('<U')) {
+      const length = parseInt(dtype.split('<U')[1])
+      chunk = new constructors['<U'](length, 4)(chunk.buffer)
+    } else {
+      chunk = new constructors[metadata.dtype](chunk.buffer)
+    }
     chunk = ndarray(chunk, metadata.chunks)
     return chunk
   }
 
   // merge chunks into an array
   const mergeChunks = (chunks, metadata) => {
+    // use first chunk to get dtype (spec ensures all same)
     const dtype = Object.values(chunks[0])[0].dtype
     // get shape as exact multiple of chunks by rounding
     const shape = metadata.shape.map((d, i) => {
@@ -187,7 +197,12 @@ const zarr = (request) => {
       return Math.floor(d / c) * c + ((d % c) > 0) * c
     })
     // create new array to store merged chunks
-    const merged = pool.zeros(shape, dtype)
+    let merged
+    if (dtype === 'array') {
+      merged = ndarray(new Array(shape.reduce((a, b) => a * b, 1)), shape)
+    } else {
+      merged = pool.zeros(shape, dtype)
+    }
     // loop over chunks inserting into array based on key
     chunks.forEach((chunk) => {
       const key = Object.keys(chunk)[0].split('.').map((k) => parseInt(k))
@@ -239,16 +254,41 @@ const zarr = (request) => {
     return keys
   }
 
+  function StringArray (size, bytes) {
+    return (buffer) => {
+      const count = buffer.byteLength / (size * bytes)
+      const array = []
+      for (let s = 0; s < count; s++) {
+        const subuffer = buffer.slice(s * bytes * size, (s + 1) * bytes * size)
+        const substring = []
+        for (let c = 0; c < size; c++) {
+          const parsed = Buffer.from(subuffer.slice(c * bytes, (c + 1) * bytes)).toString('utf8')
+          substring.push(parsed.replace(/\x00/g, ''))
+        }
+        array.push(substring.join(''))
+      }
+      return array
+    }
+  }
+
+  function BoolArray (buffer) {
+    const result = new Uint8Array(buffer)
+    return Array.from(result).map(d => d === 1)
+  }
+
   const constructors = {
     '<i1': Int8Array,
     '<u1': Uint8Array,
+    '|b1': BoolArray,
     '|u1': Uint8Array,
     '<i2': Int16Array,
     '<u2': Uint16Array,
     '<i4': Int32Array,
     '<u4': Uint32Array,
     '<f4': Float32Array,
-    '<f8': Float64Array
+    '<f8': Float64Array,
+    '<U': StringArray,
+    '|S': StringArray
   }
 
   return {

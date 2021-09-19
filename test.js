@@ -51,6 +51,62 @@ test('1d.contiguous.compressed.f8', function (t) {
   })
 })
 
+test('1d.contiguous.compressed.U13', function (t) {
+  zarr.load('data/1d.contiguous.compressed.U13.zarr', (err, array) => {
+    t.deepEqual(array.data, new Array('a', 'b', 'cc', 'd'))
+    t.end()
+  })
+})
+
+test('1d.contiguous.uncompressed.U13', function (t) {
+  zarr.load('data/1d.contiguous.compressed.U13.zarr', (err, array) => {
+    t.deepEqual(array.data, new Array('a', 'b', 'cc', 'd'))
+    t.end()
+  })
+})
+
+test('1d.contiguous.compressed.U7', function (t) {
+  zarr.load('data/1d.contiguous.compressed.U13.zarr', (err, array) => {
+    t.deepEqual(array.data, new Array('a', 'b', 'cc', 'd'))
+    t.end()
+  })
+})
+
+test('1d.contiguous.uncompressed.U7', function (t) {
+  zarr.load('data/1d.contiguous.compressed.U13.zarr', (err, array) => {
+    t.deepEqual(array.data, new Array('a', 'b', 'cc', 'd'))
+    t.end()
+  })
+})
+
+test('1d.contiguous.compressed.S7', function (t) {
+  zarr.load('data/1d.contiguous.compressed.U13.zarr', (err, array) => {
+    t.deepEqual(array.data, new Array('a', 'b', 'cc', 'd'))
+    t.end()
+  })
+})
+
+test('1d.contiguous.uncompressed.S7', function (t) {
+  zarr.load('data/1d.contiguous.compressed.U13.zarr', (err, array) => {
+    t.deepEqual(array.data, new Array('a', 'b', 'cc', 'd'))
+    t.end()
+  })
+})
+
+test('1d.contiguous.compressed.b1', function (t) {
+  zarr.load('data/1d.contiguous.compressed.b1.zarr', (err, array) => {
+    t.deepEqual(array.data, new Array(true, false, true, false))
+    t.end()
+  })
+})
+
+test('1d.contiguous.uncompressed.b1', function (t) {
+  zarr.load('data/1d.contiguous.compressed.b1.zarr', (err, array) => {
+    t.deepEqual(array.data, new Array(true, false, true, false))
+    t.end()
+  })
+})
+
 test('1d.contiguous.uncompressed.f8', function (t) {
   zarr.load('data/1d.contiguous.uncompressed.f8.zarr', (err, array) => {
     t.deepEqual(array.data, new Float64Array([1.5, 2.5, 3.5, 4.5]))
@@ -83,6 +139,14 @@ test('2d.contiguous.compressed.i2', function (t) {
 test('2d.chunked.compressed.i2', function (t) {
   zarr.load('data/2d.chunked.compressed.i2.zarr', (err, array) => {
     t.deepEqual(array.data, new Int16Array([1, 2, 3, 4]))
+    t.deepEqual(array.shape, [2, 2])
+    t.end()
+  })
+})
+
+test('2d.chunked.compressed.U7', function (t) {
+  zarr.load('data/2d.chunked.compressed.U7.zarr', (err, array) => {
+    t.deepEqual(array.data, new Array('a', 'b', 'cc', 'd'))
     t.deepEqual(array.shape, [2, 2])
     t.end()
   })

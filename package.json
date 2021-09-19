@@ -4,7 +4,7 @@
   "description": "load chunked binary zarr files in javascript",
   "main": "index.js",
   "scripts": {
-    "test": "standard index.js && tape test.js | tap-spec"
+    "test": "tape test.js | tap-spec"
   },
   "author": "freeman-lab",
   "license": "MIT",
