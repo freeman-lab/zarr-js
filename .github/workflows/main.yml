@@ -8,7 +8,7 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [10.x, 12.x, 14.x]
+        node-version: [12.x, 14.x]
 
     steps:
       - uses: actions/checkout@v2
@@ -16,13 +16,9 @@ jobs:
         uses: actions/setup-node@v2.4.0
         with:
           node-version: ${{ matrix.node-version }}
-      - name: test module
-        run: |
-          npm i
-          npm run test
-  lint:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v1
-      - uses: actions/setup-python@v2.2.2
-      - uses: pre-commit/action@v2.0.3
+      - name: install
+        run: npm install
+      - name: test
+        run: npm run test
+      - name: lint
+        run: npm run prettier
