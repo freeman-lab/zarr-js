@@ -4,7 +4,8 @@
   "description": "load chunked binary zarr files in javascript",
   "main": "index.js",
   "scripts": {
-    "test": "tape test.js | tap-spec"
+    "test": "tape test.js | tap-spec",
+    "prettier": "prettier --write index.js"
   },
   "author": "freeman-lab",
   "license": "MIT",
@@ -17,6 +18,7 @@
     "pako": "^1.0.10"
   },
   "devDependencies": {
+    "prettier": "^2.4.1",
     "tap-spec": "^5.0.0",
     "tape": "^4.13.0"
   }
