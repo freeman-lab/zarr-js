@@ -1,4 +1,4 @@
-const { unzlibSync } = require('fflate')
+const { inflate } = require('pako')
 const ndarray = require('ndarray')
 const ops = require('ndarray-ops')
 const { parallel } = require('async')
@@ -173,7 +173,7 @@ const zarr = (request) => {
   const parseChunk = (chunk, metadata) => {
     if (metadata.compressor) {
       if (metadata.compressor.id === 'zlib') {
-        chunk = unzlibSync(chunk)
+        chunk = inflate(chunk)
       } else {
         throw new Error(
           'compressor ' + metadata.compressor.id + ' is not supported'
