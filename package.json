@@ -12,10 +12,10 @@
   "dependencies": {
     "async": "^2.6.2",
     "cartesian-product": "^2.1.2",
+    "fflate": "^0.7.1",
     "ndarray": "^1.0.18",
     "ndarray-ops": "^1.2.2",
     "ndarray-scratch": "^1.2.0",
-    "pako": "^1.0.10"
   },
   "devDependencies": {
     "prettier": "^2.4.1",
