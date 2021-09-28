@@ -1,6 +1,6 @@
 {
   "name": "zarr-js",
-  "version": "2.1.1",
+  "version": "2.1.3",
   "description": "load chunked binary zarr files in javascript",
   "main": "index.js",
   "scripts": {
