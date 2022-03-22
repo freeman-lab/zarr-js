@@ -159,6 +159,14 @@ test('2d.chunked.compressed.U7', function (t) {
   })
 })
 
+test('2d.chunked.filled.compressed.U7', function (t) {
+  zarr.load('data/2d.chunked.filled.compressed.U7.zarr', (err, array) => {
+    t.deepEqual(array.data, new Array('a', 'b', 'cc', ''))
+    t.deepEqual(array.shape, [2, 2])
+    t.end()
+  })
+})
+
 test('2d.chunked.ragged.compressed.i2', function (t) {
   zarr.load('data/2d.chunked.ragged.compressed.i2.zarr', (err, array) => {
     t.deepEqual(array.data, new Int16Array([1, 2, 3, 4, 5, 6, 7, 8, 9]))
