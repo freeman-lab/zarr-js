@@ -203,7 +203,7 @@ const zarr = (request) => {
         chunk = new constructors[metadata.dtype](chunk.buffer)
       }
     } else {
-      const length = metadata.chunks.reduce((a, c) => a + c, 0)
+      const length = metadata.chunks.reduce((a, b) => a * b, 1)
       chunk = Array(length).fill(metadata.fill_value)
     }
     chunk = ndarray(chunk, metadata.chunks)
