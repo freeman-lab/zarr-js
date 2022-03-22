@@ -86,6 +86,7 @@ Opens consolidated metadata for a zarr group, which is typically a collection of
 To run the tests, generate the example data from Python by running
 
 ```
+rm -rf data
 python generate.py
 ```
 
