@@ -171,24 +171,29 @@ const zarr = (request) => {
 
   // parse a single zarr chunk
   const parseChunk = (chunk, metadata) => {
-    if (metadata.compressor) {
-      if (metadata.compressor.id === 'zlib') {
-        chunk = inflate(chunk)
-      } else {
-        throw new Error(
-          'compressor ' + metadata.compressor.id + ' is not supported'
-        )
+    if (chunk) {
+      if (metadata.compressor) {
+        if (metadata.compressor.id === 'zlib') {
+          chunk = inflate(chunk)
+        } else {
+          throw new Error(
+            'compressor ' + metadata.compressor.id + ' is not supported'
+          )
+        }
       }
-    }
-    const dtype = metadata.dtype
-    if (dtype.startsWith('|S')) {
-      const length = parseInt(dtype.split('|S')[1])
-      chunk = new constructors['|S'](length, 1)(chunk.buffer)
-    } else if (metadata.dtype.startsWith('<U')) {
-      const length = parseInt(dtype.split('<U')[1])
-      chunk = new constructors['<U'](length, 4)(chunk.buffer)
+      const dtype = metadata.dtype
+      if (dtype.startsWith('|S')) {
+        const length = parseInt(dtype.split('|S')[1])
+        chunk = new constructors['|S'](length, 1)(chunk.buffer)
+      } else if (metadata.dtype.startsWith('<U')) {
+        const length = parseInt(dtype.split('<U')[1])
+        chunk = new constructors['<U'](length, 4)(chunk.buffer)
+      } else {
+        chunk = new constructors[metadata.dtype](chunk.buffer)
+      }
     } else {
-      chunk = new constructors[metadata.dtype](chunk.buffer)
+      const length = metadata.chunks.reduce((a, c) => a + c, 0)
+      chunk = Array(length).fill(metadata.fill_value)
     }
     chunk = ndarray(chunk, metadata.chunks)
     return chunk
