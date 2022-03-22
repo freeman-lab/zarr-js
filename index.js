@@ -16,7 +16,11 @@ const zarr = (request) => {
     try {
       response = await request(src)
     } catch (err) {
-      return cb(new Error('error evaluating fetching function'))
+      if (type === 'arraybuffer' && err.code === 'ENOENT') {
+        return cb(null, null)
+      } else {
+        return cb(new Error('error evaluating fetching function'))
+      }
     }
     if (response && Buffer.isBuffer(response)) {
       return cb(null, response)

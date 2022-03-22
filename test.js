@@ -9,6 +9,13 @@ test('1d.chunked.compressed.i2', function (t) {
   })
 })
 
+test('1d.chunked.filled.compressed.i2', function (t) {
+  zarr.load('data/1d.chunked.filled.compressed.i2.zarr', (err, array) => {
+    t.deepEqual(array.data, new Int16Array([1, 2, 0, 0]))
+    t.end()
+  })
+})
+
 test('1d.contiguous.uncompressed.i2', function (t) {
   zarr.load('data/1d.contiguous.uncompressed.i2.zarr', (err, array) => {
     t.deepEqual(array.data, new Int16Array([1, 2, 3, 4]))
