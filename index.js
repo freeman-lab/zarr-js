@@ -35,6 +35,13 @@ const zarr = (request) => {
         } else {
           return cb(null, body)
         }
+      } else if (
+        type === 'arraybuffer' &&
+        response &&
+        response.status &&
+        response.status === 404
+      ) {
+        return cb(null, null)
       } else {
         return cb(new Error('resource not found'))
       }
