@@ -16,7 +16,11 @@ const zarr = (request) => {
     try {
       response = await request(src)
     } catch (err) {
-      return cb(new Error('error evaluating fetching function'))
+      if (type === 'arraybuffer' && err.code === 'ENOENT') {
+        return cb(null, null)
+      } else {
+        return cb(new Error('error evaluating fetching function'))
+      }
     }
     if (response && Buffer.isBuffer(response)) {
       return cb(null, response)
@@ -35,6 +39,13 @@ const zarr = (request) => {
         } else {
           return cb(null, body)
         }
+      } else if (
+        type === 'arraybuffer' &&
+        response &&
+        response.status &&
+        response.status === 404
+      ) {
+        return cb(null, null)
       } else {
         return cb(new Error('resource not found'))
       }
@@ -171,24 +182,29 @@ const zarr = (request) => {
 
   // parse a single zarr chunk
   const parseChunk = (chunk, metadata) => {
-    if (metadata.compressor) {
-      if (metadata.compressor.id === 'zlib') {
-        chunk = inflate(chunk)
-      } else {
-        throw new Error(
-          'compressor ' + metadata.compressor.id + ' is not supported'
-        )
+    if (chunk) {
+      if (metadata.compressor) {
+        if (metadata.compressor.id === 'zlib') {
+          chunk = inflate(chunk)
+        } else {
+          throw new Error(
+            'compressor ' + metadata.compressor.id + ' is not supported'
+          )
+        }
       }
-    }
-    const dtype = metadata.dtype
-    if (dtype.startsWith('|S')) {
-      const length = parseInt(dtype.split('|S')[1])
-      chunk = new constructors['|S'](length, 1)(chunk.buffer)
-    } else if (metadata.dtype.startsWith('<U')) {
-      const length = parseInt(dtype.split('<U')[1])
-      chunk = new constructors['<U'](length, 4)(chunk.buffer)
+      const dtype = metadata.dtype
+      if (dtype.startsWith('|S')) {
+        const length = parseInt(dtype.split('|S')[1])
+        chunk = new constructors['|S'](length, 1)(chunk.buffer)
+      } else if (metadata.dtype.startsWith('<U')) {
+        const length = parseInt(dtype.split('<U')[1])
+        chunk = new constructors['<U'](length, 4)(chunk.buffer)
+      } else {
+        chunk = new constructors[metadata.dtype](chunk.buffer)
+      }
     } else {
-      chunk = new constructors[metadata.dtype](chunk.buffer)
+      const length = metadata.chunks.reduce((a, b) => a * b, 1)
+      chunk = Array(length).fill(metadata.fill_value)
     }
     chunk = ndarray(chunk, metadata.chunks)
     return chunk

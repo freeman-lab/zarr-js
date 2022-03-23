@@ -74,6 +74,10 @@ z = zarr.array([1.5, 2.5, 3.5, 4.5], dtype='f8', store=store, chunks=(4,), compr
 store = zarr.DirectoryStore('data/1d.chunked.compressed.i2.zarr')
 z = zarr.array([1, 2, 3, 4], dtype='i2', store=store, chunks=(2,), compressor=Zlib())
 
+# 1d.chunked.filled.compressed.i2
+store = zarr.DirectoryStore('data/1d.chunked.filled.compressed.i2.zarr')
+z = zarr.array([1, 2, 0, 0], dtype='i2', store=store, chunks=(2,), compressor=Zlib())
+
 # 1d.chunked.ragged.compressed.i2
 store = zarr.DirectoryStore('data/1d.chunked.ragged.compressed.i2.zarr')
 z = zarr.array([1, 2, 3, 4, 5], dtype='i2', store=store, chunks=(2,), compressor=Zlib())
@@ -89,6 +93,10 @@ z = zarr.array([[1, 2],[3, 4]], dtype='i2', store=store, chunks=(1,1), compresso
 # 2d.chunked.compressed.U7
 store = zarr.DirectoryStore('data/2d.chunked.compressed.U7.zarr')
 z = zarr.array([['a', 'b'],['cc', 'd']], dtype='U7', store=store, chunks=(1,1), compressor=Zlib())
+
+# 2d.chunked.filled.compressed.U7
+store = zarr.DirectoryStore('data/2d.chunked.filled.compressed.U7.zarr')
+z = zarr.array([['a', 'b'],['cc', '']], dtype='U7', store=store, chunks=(1,1), compressor=Zlib())
 
 # 2d.chunked.ragged.compressed.i2
 store = zarr.DirectoryStore('data/2d.chunked.ragged.compressed.i2.zarr')
