@@ -15,7 +15,7 @@
     "ndarray": "^1.0.18",
     "ndarray-ops": "^1.2.2",
     "ndarray-scratch": "^1.2.0",
-    "pako": "^1.0.10"
+    "pako": "^2.0.4"
   },
   "devDependencies": {
     "prettier": "^2.4.1",
