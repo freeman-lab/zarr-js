@@ -7,7 +7,8 @@ const zarrRemote = require('./index')(fetch)
 const args = process.argv
 
 const urlLocal = 'data/'
-const urlRemote = 'https://storage.googleapis.com/carbonplan-share/testing/zarr-js/'
+const urlRemote =
+  'https://storage.googleapis.com/carbonplan-share/testing/zarr-js/'
 
 if (args.includes('local')) {
   run(zarrLocal, urlLocal, 'local')
