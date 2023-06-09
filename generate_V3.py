@@ -342,25 +342,6 @@ a = zarrita.Array.create(
 )
 a[:] = array([1, 2, 0, 0], dtype="i2")
 
-# 1d.chunked.ragged.compressed.i2.shards
-store = zarrita.LocalStore("data/V3/1d.chunked.ragged.compressed.i2.shards.zarr")
-a = zarrita.Array.create(
-    store,
-    path=path,
-    shape=(5,),
-    dtype="int16",
-    chunk_shape=(2,),
-    codecs=[
-        zarrita.codecs.sharding_codec(
-            (1,),
-            [
-                zarrita.codecs.blosc_codec(cname="zlib"),
-            ],
-        )
-    ],
-)
-a[:] = array([1, 2, 3, 4, 5], dtype="i2")
-
 # 2d.contiguous.compressed.i2.shards
 store = zarrita.LocalStore("data/V3/2d.contiguous.compressed.i2.shards.zarr")
 a = zarrita.Array.create(
