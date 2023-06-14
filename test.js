@@ -6,7 +6,7 @@ const zarrRemote = require('./index')(fetch)
 
 const args = process.argv
 
-const urlLocal = 'data/V2/'
+const urlLocal = 'data/v2/'
 const urlRemote =
   'https://storage.googleapis.com/carbonplan-share/testing/zarr-js/'
 
