@@ -4,9 +4,10 @@
   "description": "load chunked binary zarr files in javascript",
   "main": "index.js",
   "scripts": {
-    "test": "tape test.js local remote | tap-spec",
-    "test-local": "tape test.js local | tap-spec",
-    "test-remote": "tape test.js remote | tap-spec",
+    "test": "npm run test-v2",
+    "test-v2": "tape test/v2.js local remote | tap-spec",
+    "test-local-v2": "tape test/v2.js local | tap-spec",
+    "test-remote-v2": "tape test/v2.js remote | tap-spec",
     "prettier": "prettier --write index.js"
   },
   "author": "freeman-lab",

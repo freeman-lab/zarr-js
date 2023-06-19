@@ -1,8 +1,8 @@
 const test = require('tape')
 const fs = require('fs/promises')
 const fetch = require('node-fetch')
-const zarrLocal = require('./index')(fs.readFile)
-const zarrRemote = require('./index')(fetch)
+const zarrLocal = require('../index')(fs.readFile, 'v2')
+const zarrRemote = require('../index')(fetch, 'v2')
 
 const args = process.argv
 
