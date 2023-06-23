@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "npm run test-v2",
+    "test-v3": "tape test/v3.js local | tap-spec",
     "test-v2": "tape test/v2.js local remote | tap-spec",
     "test-local-v2": "tape test/v2.js local | tap-spec",
     "test-remote-v2": "tape test/v2.js remote | tap-spec",
