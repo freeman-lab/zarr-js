@@ -1,0 +1,17 @@
+{
+    "attributes": {},
+    "chunk_grid": {
+        "chunk_shape": [
+            4
+        ],
+        "separator": "/",
+        "type": "regular"
+    },
+    "chunk_memory_layout": "C",
+    "data_type": "<i2",
+    "extensions": [],
+    "fill_value": 0,
+    "shape": [
+        4
+    ]
+}

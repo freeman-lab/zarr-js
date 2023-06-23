@@ -1,428 +1,420 @@
-import zarrita
-from numpy import array, arange
+"""
+generate test data for zarr-js
+"""
 
-path = "a"
+import os
+from numpy import arange
+from numcodecs.zlib import Zlib
+
+os.environ["ZARR_V3_EXPERIMENTAL_API"] = "1"
+os.environ["ZARR_V3_SHARDING"] = "1"
+
+import zarr  # noqa
+from zarr._storage.v3 import DirectoryStoreV3  # noqa
+from zarr._storage.v3_storage_transformers import ShardingStorageTransformer  # noqa
+
 
 # 1d.contiguous.compressed.i2
-store = zarrita.LocalStore("data/v3/1d.contiguous.compressed.i2.zarr")
-a = zarrita.Array.create(
-    store,
-    shape=(4,),
-    dtype="int16",
-    chunk_shape=(4,),
-    codecs=[zarrita.codecs.gzip_codec()],
-)
-a[:] = array([1, 2, 3, 4], dtype="i2")
+store = DirectoryStoreV3("data/v3/1d.contiguous.compressed.i2.zarr")
+z = zarr.array([1, 2, 3, 4], dtype="i2", store=store, chunks=(4,), compressor=Zlib())
 
 # 1d.contiguous.uncompressed.i2
-store = zarrita.LocalStore("data/v3/1d.contiguous.uncompressed.i2.zarr")
-a = zarrita.Array.create(
-    store,
-    shape=(4,),
-    dtype="int16",
-    chunk_shape=(4,),
-)
-a[:] = array([1, 2, 3, 4], dtype="i2")
+store = DirectoryStoreV3("data/v3/1d.contiguous.uncompressed.i2.zarr")
+z = zarr.array([1, 2, 3, 4], dtype="i2", store=store, chunks=(4,), compressor=None)
 
 # 1d.contiguous.compressed.i4
-store = zarrita.LocalStore("data/v3/1d.contiguous.compressed.i4.zarr")
-a = zarrita.Array.create(
-    store,
-    shape=(4,),
-    dtype="int32",
-    chunk_shape=(4,),
-    codecs=[zarrita.codecs.gzip_codec()],
-)
-a[:] = array([1, 2, 3, 4], dtype="i4")
+store = DirectoryStoreV3("data/v3/1d.contiguous.compressed.i4.zarr")
+z = zarr.array([1, 2, 3, 4], dtype="i4", store=store, chunks=(4,), compressor=Zlib())
 
 # 1d.contiguous.compressed.u1
-store = zarrita.LocalStore("data/v3/1d.contiguous.compressed.u1.zarr")
-a = zarrita.Array.create(
-    store,
-    shape=(4,),
-    dtype="uint8",
-    chunk_shape=(4,),
-    codecs=[zarrita.codecs.gzip_codec()],
+store = DirectoryStoreV3("data/v3/1d.contiguous.compressed.u1.zarr")
+z = zarr.array(
+    [255, 0, 255, 0], dtype="u1", store=store, chunks=(4,), compressor=Zlib()
 )
-a[:] = array([255, 0, 255, 0], dtype="u1")
-
 
 # 1d.contiguous.compressed.<f4
-store = zarrita.LocalStore("data/v3/1d.contiguous.compressed.f4.zarr")
-a = zarrita.Array.create(
-    store,
-    shape=(4,),
-    dtype="float32",
-    chunk_shape=(4,),
-    codecs=[zarrita.codecs.gzip_codec()],
+store = DirectoryStoreV3("data/v3/1d.contiguous.compressed.f4.zarr")
+z = zarr.array(
+    [-1000.5, 0, 1000.5, 0], dtype="f4", store=store, chunks=(4,), compressor=Zlib()
 )
-a[:] = array([-1000.5, 0, 1000.5, 0], dtype="f4")
 
 # 1d.contiguous.uncompressed.i4
-store = zarrita.LocalStore("data/v3/1d.contiguous.uncompressed.i4.zarr")
-a = zarrita.Array.create(
-    store,
-    shape=(4,),
-    dtype="int32",
-    chunk_shape=(4,),
-)
-a[:] = array([1, 2, 3, 4], dtype="i4")
+store = DirectoryStoreV3("data/v3/1d.contiguous.uncompressed.i4.zarr")
+z = zarr.array([1, 2, 3, 4], dtype="i4", store=store, chunks=(4,), compressor=None)
 
 # 1d.contiguous.compressed.f8
-store = zarrita.LocalStore("data/v3/1d.contiguous.compressed.f8.zarr")
-a = zarrita.Array.create(
-    store,
-    shape=(4,),
-    dtype="float64",
-    chunk_shape=(4,),
-    codecs=[zarrita.codecs.gzip_codec()],
+store = DirectoryStoreV3("data/v3/1d.contiguous.compressed.f8.zarr")
+z = zarr.array(
+    [1.5, 2.5, 3.5, 4.5], dtype="f8", store=store, chunks=(4,), compressor=Zlib()
 )
-a[:] = array([1.5, 2.5, 3.5, 4.5], dtype="f8")
+
+# 1d.contiguous.uncompressed.U13
+store = DirectoryStoreV3("data/v3/1d.contiguous.uncompressed.U13.zarr")
+z = zarr.array(
+    ["a", "b", "cc", "d"], dtype="U13", store=store, chunks=(4,), compressor=None
+)
+
+# 1d.contiguous.compressed.U13
+store = DirectoryStoreV3("data/v3/1d.contiguous.compressed.U13.zarr")
+z = zarr.array(
+    ["a", "b", "cc", "d"], dtype="U13", store=store, chunks=(4,), compressor=Zlib()
+)
+
+# 1d.contiguous.uncompressed.U7
+store = DirectoryStoreV3("data/v3/1d.contiguous.uncompressed.U7.zarr")
+z = zarr.array(
+    ["a", "b", "cc", "d"], dtype="U7", store=store, chunks=(4,), compressor=None
+)
+
+# 1d.contiguous.compressed.U7
+store = DirectoryStoreV3("data/v3/1d.contiguous.compressed.U7.zarr")
+z = zarr.array(
+    ["a", "b", "cc", "d"], dtype="U7", store=store, chunks=(4,), compressor=Zlib()
+)
+
+# 1d.contiguous.uncompressed.S7
+store = DirectoryStoreV3("data/v3/1d.contiguous.uncompressed.S7.zarr")
+z = zarr.array(
+    ["a", "b", "cc", "d"], dtype="S7", store=store, chunks=(4,), compressor=None
+)
+
+# 1d.contiguous.compressed.S7
+store = DirectoryStoreV3("data/v3/1d.contiguous.compressed.S7.zarr")
+z = zarr.array(
+    ["a", "b", "cc", "d"], dtype="S7", store=store, chunks=(4,), compressor=Zlib()
+)
+
+# 1d.contiguous.uncompressed.b1
+store = DirectoryStoreV3("data/v3/1d.contiguous.uncompressed.b1.zarr")
+z = zarr.array(
+    [True, False, True, False],
+    dtype="b1",
+    store=store,
+    chunks=(4,),
+    compressor=None,
+)
+
+# 1d.contiguous.compressed.b1
+store = DirectoryStoreV3("data/v3/1d.contiguous.compressed.b1.zarr")
+z = zarr.array(
+    [True, False, True, False],
+    dtype="b1",
+    store=store,
+    chunks=(4,),
+    compressor=Zlib(),
+)
 
 # 1d.contiguous.uncompressed.f8
-store = zarrita.LocalStore("data/v3/1d.contiguous.uncompressed.f8.zarr")
-a = zarrita.Array.create(
-    store,
-    shape=(4,),
-    dtype="float64",
-    chunk_shape=(4,),
+store = DirectoryStoreV3("data/v3/1d.contiguous.uncompressed.f8.zarr")
+z = zarr.array(
+    [1.5, 2.5, 3.5, 4.5], dtype="f8", store=store, chunks=(4,), compressor=None
 )
-a[:] = array([1.5, 2.5, 3.5, 4.5], dtype="f8")
 
 # 1d.chunked.compressed.i2
-store = zarrita.LocalStore("data/v3/1d.chunked.compressed.i2.zarr")
-a = zarrita.Array.create(
-    store,
-    shape=(4,),
-    dtype="int16",
-    chunk_shape=(2,),
-    codecs=[zarrita.codecs.gzip_codec()],
-)
-a[:] = array([1, 2, 3, 4], dtype="i2")
+store = DirectoryStoreV3("data/v3/1d.chunked.compressed.i2.zarr")
+z = zarr.array([1, 2, 3, 4], dtype="i2", store=store, chunks=(2,), compressor=Zlib())
 
 # 1d.chunked.filled.compressed.i2
-store = zarrita.LocalStore("data/v3/1d.chunked.filled.compressed.i2.zarr")
-a = zarrita.Array.create(
-    store,
-    shape=(4,),
-    dtype="int16",
-    chunk_shape=(2,),
-    codecs=[zarrita.codecs.gzip_codec()],
-)
-a[:] = array([1, 2, 0, 0], dtype="i2")
+store = DirectoryStoreV3("data/v3/1d.chunked.filled.compressed.i2.zarr")
+z = zarr.array([1, 2, 0, 0], dtype="i2", store=store, chunks=(2,), compressor=Zlib())
 
 # 1d.chunked.ragged.compressed.i2
-store = zarrita.LocalStore("data/v3/1d.chunked.ragged.compressed.i2.zarr")
-a = zarrita.Array.create(
-    store,
-    shape=(5,),
-    dtype="int16",
-    chunk_shape=(2,),
-    codecs=[zarrita.codecs.gzip_codec()],
-)
-a[:] = array([1, 2, 3, 4, 5], dtype="i2")
+store = DirectoryStoreV3("data/v3/1d.chunked.ragged.compressed.i2.zarr")
+z = zarr.array([1, 2, 3, 4, 5], dtype="i2", store=store, chunks=(2,), compressor=Zlib())
 
 # 2d.contiguous.compressed.i2
-store = zarrita.LocalStore("data/v3/2d.contiguous.compressed.i2.zarr")
-a = zarrita.Array.create(
-    store,
-    shape=(2, 2),
-    dtype="int16",
-    chunk_shape=(2, 2),
-    codecs=[zarrita.codecs.gzip_codec()],
+store = DirectoryStoreV3("data/v3/2d.contiguous.compressed.i2.zarr")
+z = zarr.array(
+    [[1, 2], [3, 4]], dtype="i2", store=store, chunks=(2, 2), compressor=Zlib()
 )
-a[:] = arange(4, dtype="i2").reshape(2, 2)
 
 # 2d.chunked.compressed.i2
-store = zarrita.LocalStore("data/v3/2d.chunked.compressed.i2.zarr")
-a = zarrita.Array.create(
-    store,
-    shape=(2, 2),
-    dtype="int16",
-    chunk_shape=(1, 1),
-    codecs=[zarrita.codecs.gzip_codec()],
+store = DirectoryStoreV3("data/v3/2d.chunked.compressed.i2.zarr")
+z = zarr.array(
+    [[1, 2], [3, 4]], dtype="i2", store=store, chunks=(1, 1), compressor=Zlib()
 )
-a[:] = arange(4, dtype="i2").reshape(2, 2)
+
+# 2d.chunked.compressed.U7
+store = DirectoryStoreV3("data/v3/2d.chunked.compressed.U7.zarr")
+z = zarr.array(
+    [["a", "b"], ["cc", "d"]],
+    dtype="U7",
+    store=store,
+    chunks=(1, 1),
+    compressor=Zlib(),
+)
+
+# 2d.chunked.filled.compressed.U7
+store = DirectoryStoreV3("data/v3/2d.chunked.filled.compressed.U7.zarr")
+z = zarr.array(
+    [["a", "b"], ["cc", ""]],
+    dtype="U7",
+    store=store,
+    chunks=(1, 1),
+    compressor=Zlib(),
+)
 
 # 2d.chunked.ragged.compressed.i2
-store = zarrita.LocalStore("data/v3/2d.chunked.ragged.compressed.i2.zarr")
-a = zarrita.Array.create(
-    store,
-    shape=(3, 3),
-    dtype="int16",
-    chunk_shape=(2, 2),
-    codecs=[zarrita.codecs.gzip_codec()],
+store = DirectoryStoreV3("data/v3/2d.chunked.ragged.compressed.i2.zarr")
+z = zarr.array(
+    [[1, 2, 3], [4, 5, 6], [7, 8, 9]],
+    dtype="i2",
+    store=store,
+    chunks=(2, 2),
+    compressor=Zlib(),
 )
-a[:] = arange(9, dtype="i2").reshape(3, 3)
-
 
 # 3d.contiguous.compressed
-store = zarrita.LocalStore("data/v3/3d.contiguous.compressed.i2.zarr")
-a = zarrita.Array.create(
-    store,
-    shape=(3, 3, 3),
-    dtype="int16",
-    chunk_shape=(3, 3, 3),
-    codecs=[zarrita.codecs.gzip_codec()],
+store = DirectoryStoreV3("data/v3/3d.contiguous.compressed.i2.zarr")
+z = zarr.array(
+    arange(27).reshape(3, 3, 3),
+    dtype="i2",
+    store=store,
+    chunks=(3, 3, 3),
+    compressor=Zlib(),
 )
-a[:] = arange(27, dtype="i2").reshape(3, 3, 3)
 
 # 3d.chunked.compressed
-store = zarrita.LocalStore("data/v3/3d.chunked.compressed.i2.zarr")
-a = zarrita.Array.create(
-    store,
-    shape=(3, 3, 3),
-    dtype="int16",
-    chunk_shape=(1, 1, 1),
-    codecs=[zarrita.codecs.gzip_codec()],
+store = DirectoryStoreV3("data/v3/3d.chunked.compressed.i2.zarr")
+z = zarr.array(
+    arange(27).reshape(3, 3, 3),
+    dtype="i2",
+    store=store,
+    chunks=(1, 1, 1),
+    compressor=Zlib(),
 )
-a[:] = arange(27, dtype="i2").reshape(3, 3, 3)
 
 # 3d.chunked.mixed.compressed
-store = zarrita.LocalStore("data/v3/3d.chunked.mixed.compressed.i2.zarr")
-a = zarrita.Array.create(
-    store,
-    shape=(3, 3, 3),
-    dtype="int16",
-    chunk_shape=(3, 3, 1),
-    codecs=[zarrita.codecs.gzip_codec()],
+store = DirectoryStoreV3("data/v3/3d.chunked.mixed.compressed.i2.zarr")
+z = zarr.array(
+    arange(27).reshape(3, 3, 3),
+    dtype="i2",
+    store=store,
+    chunks=(3, 3, 1),
+    compressor=Zlib(),
 )
-a[:] = arange(27, dtype="i2").reshape(3, 3, 3)
 
-#####
+# 1d.contiguous.compressed.i2.group
+store = DirectoryStoreV3("data/v3/1d.contiguous.compressed.i2.group.zarr")
+root = zarr.open(store=store, mode="w")
+root.array("a", [1, 2, 3, 4], dtype="i2", chunks=(4,), compressor=Zlib())
+root.array("b", [5, 6, 7, 8], dtype="i2", chunks=(4,), compressor=Zlib())
+zarr.consolidate_metadata(store)
 
-# 1d.contiguous.compressed.i2.shards
-store = zarrita.LocalStore("data/v3/1d.contiguous.compressed.i2.shards.zarr")
-a = zarrita.Array.create(
-    store,
-    shape=(4,),
-    dtype="int16",
-    chunk_shape=(4,),
-    codecs=[
-        zarrita.codecs.sharding_codec(
-            (2,),
-            [
-                zarrita.codecs.gzip_codec(),
-            ],
-        )
-    ],
+# 1d.contiguous.compressed.sharded.i2
+store = DirectoryStoreV3("data/v3/1d.contiguous.compressed.sharded.i2.zarr")
+sharding_transformer = ShardingStorageTransformer("indexed", chunks_per_shard=(2,))
+z = zarr.array(
+    [1, 2, 3, 4],
+    dtype="i2",
+    store=store,
+    chunks=(4,),
+    compressor=Zlib(),
+    storage_transformers=[sharding_transformer],
 )
-a[:] = array([1, 2, 3, 4], dtype="i2")
 
-# 1d.contiguous.compressed.i4.shards
-store = zarrita.LocalStore("data/v3/1d.contiguous.compressed.i4.shards.zarr")
-a = zarrita.Array.create(
-    store,
-    shape=(4,),
-    dtype="int32",
-    chunk_shape=(4,),
-    codecs=[
-        zarrita.codecs.sharding_codec(
-            (2,),
-            [
-                zarrita.codecs.gzip_codec(),
-            ],
-        )
-    ],
+
+# 1d.contiguous.compressed.sharded.i4
+store = DirectoryStoreV3("data/v3/1d.contiguous.compressed.sharded.i4.zarr")
+sharding_transformer = ShardingStorageTransformer("indexed", chunks_per_shard=(2,))
+z = zarr.array(
+    [1, 2, 3, 4],
+    dtype="i4",
+    store=store,
+    chunks=(4,),
+    compressor=Zlib(),
+    storage_transformers=[sharding_transformer],
 )
-a[:] = array([1, 2, 3, 4], dtype="i4")
 
-# 1d.contiguous.compressed.u1.shards
-store = zarrita.LocalStore("data/v3/1d.contiguous.compressed.u1.shards.zarr")
-a = zarrita.Array.create(
-    store,
-    shape=(4,),
-    dtype="uint8",
-    chunk_shape=(4,),
-    codecs=[
-        zarrita.codecs.sharding_codec(
-            (2,),
-            [
-                zarrita.codecs.gzip_codec(),
-            ],
-        )
-    ],
+# 1d.contiguous.compressed.sharded.u1
+store = DirectoryStoreV3("data/v3/1d.contiguous.compressed.sharded.u1.zarr")
+sharding_transformer = ShardingStorageTransformer("indexed", chunks_per_shard=(2,))
+z = zarr.array(
+    [255, 0, 255, 0],
+    dtype="u1",
+    store=store,
+    chunks=(4,),
+    compressor=Zlib(),
+    storage_transformers=[sharding_transformer],
 )
-a[:] = array([255, 0, 255, 0], dtype="u1")
 
-
-# 1d.contiguous.compressed.<f4.shards
-store = zarrita.LocalStore("data/v3/1d.contiguous.compressed.f4.shards.zarr")
-a = zarrita.Array.create(
-    store,
-    shape=(4,),
-    dtype="float32",
-    chunk_shape=(4,),
-    codecs=[
-        zarrita.codecs.sharding_codec(
-            (2,),
-            [
-                zarrita.codecs.gzip_codec(),
-            ],
-        )
-    ],
+# 1d.contiguous.compressed.sharded.<f4
+store = DirectoryStoreV3("data/v3/1d.contiguous.compressed.sharded.f4.zarr")
+sharding_transformer = ShardingStorageTransformer("indexed", chunks_per_shard=(2,))
+z = zarr.array(
+    [-1000.5, 0, 1000.5, 0],
+    dtype="f4",
+    store=store,
+    chunks=(4,),
+    compressor=Zlib(),
+    storage_transformers=[sharding_transformer],
 )
-a[:] = array([-1000.5, 0, 1000.5, 0], dtype="f4")
 
-# 1d.contiguous.compressed.f8.shards
-store = zarrita.LocalStore("data/v3/1d.contiguous.compressed.f8.shards.zarr")
-a = zarrita.Array.create(
-    store,
-    shape=(4,),
-    dtype="float64",
-    chunk_shape=(4,),
-    codecs=[
-        zarrita.codecs.sharding_codec(
-            (2,),
-            [
-                zarrita.codecs.gzip_codec(),
-            ],
-        )
-    ],
+
+# 1d.contiguous.compressed.sharded.f8
+store = DirectoryStoreV3("data/v3/1d.contiguous.compressed.sharded.f8.zarr")
+sharding_transformer = ShardingStorageTransformer("indexed", chunks_per_shard=(2,))
+z = zarr.array(
+    [1.5, 2.5, 3.5, 4.5],
+    dtype="f8",
+    store=store,
+    chunks=(4,),
+    compressor=Zlib(),
+    storage_transformers=[sharding_transformer],
 )
-a[:] = array([1.5, 2.5, 3.5, 4.5], dtype="f8")
 
-# 1d.chunked.compressed.i2.shards
-store = zarrita.LocalStore("data/v3/1d.chunked.compressed.i2.shards.zarr")
-a = zarrita.Array.create(
-    store,
-    shape=(4,),
-    dtype="int16",
-    chunk_shape=(2,),
-    codecs=[
-        zarrita.codecs.sharding_codec(
-            (1,),
-            [
-                zarrita.codecs.gzip_codec(),
-            ],
-        )
-    ],
+
+# 1d.contiguous.compressed.sharded.U13
+store = DirectoryStoreV3("data/v3/1d.contiguous.compressed.sharded.U13.zarr")
+sharding_transformer = ShardingStorageTransformer("indexed", chunks_per_shard=(2,))
+z = zarr.array(
+    ["a", "b", "cc", "d"],
+    dtype="U13",
+    store=store,
+    chunks=(4,),
+    compressor=Zlib(),
+    storage_transformers=[sharding_transformer],
 )
-a[:] = array([1, 2, 3, 4], dtype="i2")
 
-# 1d.chunked.filled.compressed.i2.shards
-store = zarrita.LocalStore("data/v3/1d.chunked.filled.compressed.i2.shards.zarr")
-a = zarrita.Array.create(
-    store,
-    shape=(4,),
-    dtype="int16",
-    chunk_shape=(2,),
-    codecs=[
-        zarrita.codecs.sharding_codec(
-            (1,),
-            [
-                zarrita.codecs.gzip_codec(),
-            ],
-        )
-    ],
+# 1d.contiguous.compressed.sharded.U7
+store = DirectoryStoreV3("data/v3/1d.contiguous.compressed.sharded.U7.zarr")
+sharding_transformer = ShardingStorageTransformer("indexed", chunks_per_shard=(2,))
+z = zarr.array(
+    ["a", "b", "cc", "d"],
+    dtype="U7",
+    store=store,
+    chunks=(4,),
+    compressor=Zlib(),
+    storage_transformers=[sharding_transformer],
 )
-a[:] = array([1, 2, 0, 0], dtype="i2")
 
-# 2d.contiguous.compressed.i2.shards
-store = zarrita.LocalStore("data/v3/2d.contiguous.compressed.i2.shards.zarr")
-a = zarrita.Array.create(
-    store,
-    shape=(2, 2),
-    dtype="int16",
-    chunk_shape=(2, 2),
-    codecs=[
-        zarrita.codecs.sharding_codec(
-            (1, 1),
-            [
-                zarrita.codecs.gzip_codec(),
-            ],
-        )
-    ],
+# 1d.contiguous.compressed.sharded.S7
+store = DirectoryStoreV3("data/v3/1d.contiguous.compressed.sharded.S7.zarr")
+sharding_transformer = ShardingStorageTransformer("indexed", chunks_per_shard=(2,))
+z = zarr.array(
+    ["a", "b", "cc", "d"],
+    dtype="S7",
+    store=store,
+    chunks=(4,),
+    compressor=Zlib(),
+    storage_transformers=[sharding_transformer],
 )
-a[:] = arange(4, dtype="i2").reshape(2, 2)
 
-# 2d.chunked.compressed.i2.shards
-store = zarrita.LocalStore("data/v3/2d.chunked.compressed.i2.shards.zarr")
-a = zarrita.Array.create(
-    store,
-    shape=(4, 4),
-    dtype="int16",
-    chunk_shape=(2, 2),
-    codecs=[
-        zarrita.codecs.sharding_codec(
-            (1, 1),
-            [
-                zarrita.codecs.gzip_codec(),
-            ],
-        )
-    ],
+# 1d.contiguous.compressed.sharded.b1
+store = DirectoryStoreV3("data/v3/1d.contiguous.compressed.sharded.b1.zarr")
+sharding_transformer = ShardingStorageTransformer("indexed", chunks_per_shard=(2,))
+
+z = zarr.array(
+    [True, False, True, False],
+    dtype="b1",
+    store=store,
+    chunks=(4,),
+    compressor=Zlib(),
+    storage_transformers=[sharding_transformer],
 )
-a[:] = arange(16, dtype="i2").reshape(4, 4)
 
-# 2d.chunked.ragged.compressed.i2.shards
-store = zarrita.LocalStore("data/v3/2d.chunked.ragged.compressed.i2.shards.zarr")
-a = zarrita.Array.create(
-    store,
-    shape=(3, 3),
-    dtype="int16",
-    chunk_shape=(2, 2),
-    codecs=[
-        zarrita.codecs.sharding_codec(
-            (1, 1),
-            [
-                zarrita.codecs.gzip_codec(),
-            ],
-        )
-    ],
+# 1d.chunked.compressed.sharded.i2
+store = DirectoryStoreV3("data/v3/1d.chunked.compressed.sharded.i2.zarr")
+sharding_transformer = ShardingStorageTransformer("indexed", chunks_per_shard=(2,))
+z = zarr.array(
+    [1, 2, 3, 4],
+    dtype="i2",
+    store=store,
+    chunks=(2,),
+    compressor=Zlib(),
+    storage_transformers=[sharding_transformer],
 )
-a[:] = arange(9, dtype="i2").reshape(3, 3)
 
-
-# 3d.contiguous.compressed.i2.shards
-store = zarrita.LocalStore("data/v3/3d.contiguous.compressed.i2.shards.zarr")
-a = zarrita.Array.create(
-    store,
-    shape=(3, 3, 3),
-    dtype="int16",
-    chunk_shape=(3, 3, 3),
-    codecs=[
-        zarrita.codecs.sharding_codec(
-            (1, 1, 1),
-            [
-                zarrita.codecs.gzip_codec(),
-            ],
-        )
-    ],
+# 1d.chunked.filled.compressed.sharded.i2
+store = DirectoryStoreV3("data/v3/1d.chunked.filled.compressed.sharded.i2.zarr")
+sharding_transformer = ShardingStorageTransformer("indexed", chunks_per_shard=(2,))
+z = zarr.array(
+    [1, 2, 0, 0],
+    dtype="i2",
+    store=store,
+    chunks=(2,),
+    compressor=Zlib(),
+    storage_transformers=[sharding_transformer],
 )
-a[:] = arange(27, dtype="i2").reshape(3, 3, 3)
 
-# 3d.chunked.compressed.i4.shards
-store = zarrita.LocalStore("data/v3/3d.chunked.compressed.i4.shards.zarr")
-a = zarrita.Array.create(
-    store,
-    shape=(8, 8, 2),
-    dtype="int16",
-    chunk_shape=(4, 4, 2),
-    codecs=[
-        zarrita.codecs.sharding_codec(
-            (2, 2, 1),
-            [
-                zarrita.codecs.gzip_codec(),
-            ],
-        )
-    ],
+# 1d.chunked.ragged.compressed.sharded.i2
+store = DirectoryStoreV3("data/v3/1d.chunked.ragged.compressed.sharded.i2.zarr")
+sharding_transformer = ShardingStorageTransformer("indexed", chunks_per_shard=(2,))
+z = zarr.array(
+    [1, 2, 3, 4, 5],
+    dtype="i2",
+    store=store,
+    chunks=(2,),
+    compressor=Zlib(),
+    storage_transformers=[sharding_transformer],
 )
-a[:] = arange(128, dtype="i4").reshape(8, 8, 2)
 
-# 3d.chunked.mixed.compressed.i4.shards
-store = zarrita.LocalStore("data/v3/3d.chunked.mixed.compressed.i4.shards.zarr")
-a = zarrita.Array.create(
-    store,
-    shape=(8, 8, 2),
-    dtype="int16",
-    chunk_shape=(4, 4, 2),
-    codecs=[
-        zarrita.codecs.sharding_codec(
-            (4, 4, 1),
-            [
-                zarrita.codecs.gzip_codec(),
-            ],
-        )
-    ],
+# 2d.contiguous.compressed.sharded.i2
+store = DirectoryStoreV3("data/v3/2d.contiguous.compressed.sharded.i2.zarr")
+sharding_transformer = ShardingStorageTransformer("indexed", chunks_per_shard=(2, 2))
+z = zarr.array(
+    [[1, 2], [3, 4]],
+    dtype="i2",
+    store=store,
+    chunks=(2, 2),
+    compressor=Zlib(),
+    storage_transformers=[sharding_transformer],
 )
-a[:] = arange(128, dtype="i4").reshape(8, 8, 2)
+
+# 2d.chunked.ragged.compressed.sharded.i2
+store = DirectoryStoreV3("data/v3/2d.chunked.ragged.compressed.sharded.i2.zarr")
+sharding_transformer = ShardingStorageTransformer("indexed", chunks_per_shard=(2, 2))
+z = zarr.array(
+    [[1, 2, 3], [4, 5, 6], [7, 8, 9]],
+    dtype="i2",
+    store=store,
+    chunks=(2, 2),
+    compressor=Zlib(),
+    storage_transformers=[sharding_transformer],
+)
+
+# 3d.contiguous.compressed.sharded
+store = DirectoryStoreV3("data/v3/3d.contiguous.compressed.sharded.i2.zarr")
+sharding_transformer = ShardingStorageTransformer("indexed", chunks_per_shard=(3, 3))
+z = zarr.array(
+    arange(27).reshape(3, 3, 3),
+    dtype="i2",
+    store=store,
+    chunks=(3, 3, 3),
+    compressor=Zlib(),
+    storage_transformers=[sharding_transformer],
+)
+
+# 3d.chunked.mixed.compressed.sharded
+store = DirectoryStoreV3("data/v3/3d.chunked.mixed.compressed.sharded.i2.zarr")
+sharding_transformer = ShardingStorageTransformer("indexed", chunks_per_shard=(3, 3, 1))
+z = zarr.array(
+    arange(27).reshape(3, 3, 3),
+    dtype="i2",
+    store=store,
+    chunks=(3, 3, 1),
+    compressor=Zlib(),
+    storage_transformers=[sharding_transformer],
+)
+
+# 1d.contiguous.compressed.sharded.i2.group
+store = DirectoryStoreV3("data/v3/1d.contiguous.compressed.sharded.i2.group.zarr")
+sharding_transformer = ShardingStorageTransformer("indexed", chunks_per_shard=(2,))
+root = zarr.open(store=store, mode="w")
+root.array(
+    "a",
+    [1, 2, 3, 4],
+    dtype="i2",
+    chunks=(4,),
+    compressor=Zlib(),
+    storage_transformers=[sharding_transformer],
+)
+root.array(
+    "b",
+    [5, 6, 7, 8],
+    dtype="i2",
+    chunks=(4,),
+    compressor=Zlib(),
+    storage_transformers=[sharding_transformer],
+)
+zarr.consolidate_metadata(store)

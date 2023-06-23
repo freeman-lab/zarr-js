@@ -1,0 +1,21 @@
+{
+    "attributes": {},
+    "chunk_grid": {
+        "chunk_shape": [
+            4
+        ],
+        "separator": "/",
+        "type": "regular"
+    },
+    "chunk_memory_layout": "C",
+    "data_type": {
+        "extension": "TODO: bytestring array protocol URL",
+        "fallback": null,
+        "type": "|S7"
+    },
+    "extensions": [],
+    "fill_value": "",
+    "shape": [
+        4
+    ]
+}
