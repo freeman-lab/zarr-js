@@ -1,0 +1,34 @@
+{
+    "attributes": {},
+    "chunk_grid": {
+        "chunk_shape": [
+            4
+        ],
+        "separator": "/",
+        "type": "regular"
+    },
+    "chunk_memory_layout": "C",
+    "compressor": {
+        "codec": "https://purl.org/zarr/spec/codec/zlib/1.0",
+        "configuration": {
+            "level": 1
+        }
+    },
+    "data_type": "<i2",
+    "extensions": [],
+    "fill_value": 0,
+    "shape": [
+        4
+    ],
+    "storage_transformers": [
+        {
+            "configuration": {
+                "chunks_per_shard": [
+                    2
+                ]
+            },
+            "extension": "https://purl.org/zarr/spec/storage_transformers/sharding/1.0",
+            "type": "indexed"
+        }
+    ]
+}
