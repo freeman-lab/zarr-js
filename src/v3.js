@@ -68,6 +68,9 @@ const zarr = (request) => {
       const keys = listKeys(arrayShape, chunkShape, separator)
 
       const getChunk = function (k, cb) {
+      	if ((k.length != arrayShape.length) || (k.length != chunkShape.length)) {
+	      	return cb(new Error('key dimensionality must match array shape and chunk shape'))
+	      }
         const key = k.join(separator)
         if (!keys.includes(key))
           return cb(new Error('storage key ' + key + ' not found', null))
@@ -79,9 +82,12 @@ const zarr = (request) => {
       }
 
       const getShardedChunk = async function (k, cb) {
+      	if ((k.length != arrayShape.length) || (k.length != chunkShape.length)) {
+	      	return cb(new Error('key dimensionality must match array shape and chunk shape'))
+	      }
       	const lookup = []
       	const chunksPerShard = metadata.storage_transformers[0].configuration.chunks_per_shard
-      	for (let i = 0; i < arrayShape.length; i++) {
+      	for (let i = 0; i < k.length; i++) {
       		lookup.push(Math.floor(k[i] / chunkShape[i]))
       	}
       	const key = lookup.join(separator)
