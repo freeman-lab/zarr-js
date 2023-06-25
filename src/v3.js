@@ -91,18 +91,23 @@ const zarr = (request) => {
       	if (!keys.includes(key))
           return cb(new Error('storage key ' + key + ' not found', null))
 
-				request(src, { method: 'HEAD' }).then((res) => {
+        // use a fetch to get file size
+				request(src, {method: 'HEAD'}).then((res) => {
 					const contentLength = res.headers.get('Content-Length')
 					if (contentLength) {
 						const fileSize = Number(contentLength)
+						// get index byte range according to sharding spec
 						const startRange = fileSize > indexSize ? fileSize - indexSize : 0
 						loader(src, {headers: {'Range': `bytes=${startRange}-${fileSize}`}}, 'arraybuffer', (err, res) => {
 							if (err) return cb(err)
 							const index = new BigUint64Array(Buffer.from(res).buffer)
-							// assume row-major order, we need to index into index
-							// based on the k we want and the chunkSize and the chunksPerShard
-							const start = 0
+							// index into the index to load the requested chunk
+							const start = k
+								.map((d, i) => d % chunksPerShard[i]) // express for a single shard
+								.map((d, i) => i == (chunksPerShard.length - 1) ? d : d * chunksPerShard[i])
+								.reduce((a, b) => a + b, 0) // convert to linear index
 							const range = `bytes=${index[start * 2]}-${index[start * 2] + index[start * 2 + 1]}`
+							// finally load the chunk
 							loader(src, {headers: {'Range': range}}, 'arraybuffer', (err, res) => {
 								if (err) return cb(err)
 								const chunk = parseChunk(res, dataType, chunkShape, fillValue, codec)
