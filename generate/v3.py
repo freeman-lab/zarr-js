@@ -5,6 +5,7 @@ generate test data for zarr-js
 import os
 from numpy import arange
 from numcodecs.zlib import Zlib
+from numcodecs.gzip import GZip
 
 os.environ["ZARR_V3_EXPERIMENTAL_API"] = "1"
 os.environ["ZARR_V3_SHARDING"] = "1"
@@ -177,10 +178,10 @@ z = zarr.array(
 # 3d.chunked.compressed
 store = DirectoryStoreV3("data/v3/3d.chunked.compressed.i2.zarr")
 z = zarr.array(
-    arange(27).reshape(3, 3, 3),
+    arange(64).reshape(4, 4, 4),
     dtype="i2",
     store=store,
-    chunks=(1, 1, 1),
+    chunks=(2, 2, 2),
     compressor=Zlib(),
 )
 
@@ -203,7 +204,7 @@ zarr.consolidate_metadata(store)
 
 # 1d.contiguous.compressed.sharded.i2
 store = DirectoryStoreV3("data/v3/1d.contiguous.compressed.sharded.i2.zarr")
-sharding_transformer = ShardingStorageTransformer("indexed", chunks_per_shard=(2,))
+sharding_transformer = ShardingStorageTransformer("indexed", chunks_per_shard=(1,))
 z = zarr.array(
     [1, 2, 3, 4],
     dtype="i2",
@@ -216,7 +217,7 @@ z = zarr.array(
 
 # 1d.contiguous.compressed.sharded.i4
 store = DirectoryStoreV3("data/v3/1d.contiguous.compressed.sharded.i4.zarr")
-sharding_transformer = ShardingStorageTransformer("indexed", chunks_per_shard=(2,))
+sharding_transformer = ShardingStorageTransformer("indexed", chunks_per_shard=(1,))
 z = zarr.array(
     [1, 2, 3, 4],
     dtype="i4",
@@ -228,7 +229,7 @@ z = zarr.array(
 
 # 1d.contiguous.compressed.sharded.u1
 store = DirectoryStoreV3("data/v3/1d.contiguous.compressed.sharded.u1.zarr")
-sharding_transformer = ShardingStorageTransformer("indexed", chunks_per_shard=(2,))
+sharding_transformer = ShardingStorageTransformer("indexed", chunks_per_shard=(1,))
 z = zarr.array(
     [255, 0, 255, 0],
     dtype="u1",
@@ -240,7 +241,7 @@ z = zarr.array(
 
 # 1d.contiguous.compressed.sharded.<f4
 store = DirectoryStoreV3("data/v3/1d.contiguous.compressed.sharded.f4.zarr")
-sharding_transformer = ShardingStorageTransformer("indexed", chunks_per_shard=(2,))
+sharding_transformer = ShardingStorageTransformer("indexed", chunks_per_shard=(1,))
 z = zarr.array(
     [-1000.5, 0, 1000.5, 0],
     dtype="f4",
@@ -253,7 +254,7 @@ z = zarr.array(
 
 # 1d.contiguous.compressed.sharded.f8
 store = DirectoryStoreV3("data/v3/1d.contiguous.compressed.sharded.f8.zarr")
-sharding_transformer = ShardingStorageTransformer("indexed", chunks_per_shard=(2,))
+sharding_transformer = ShardingStorageTransformer("indexed", chunks_per_shard=(1,))
 z = zarr.array(
     [1.5, 2.5, 3.5, 4.5],
     dtype="f8",
@@ -266,7 +267,7 @@ z = zarr.array(
 
 # 1d.contiguous.compressed.sharded.U13
 store = DirectoryStoreV3("data/v3/1d.contiguous.compressed.sharded.U13.zarr")
-sharding_transformer = ShardingStorageTransformer("indexed", chunks_per_shard=(2,))
+sharding_transformer = ShardingStorageTransformer("indexed", chunks_per_shard=(1,))
 z = zarr.array(
     ["a", "b", "cc", "d"],
     dtype="U13",
@@ -278,7 +279,7 @@ z = zarr.array(
 
 # 1d.contiguous.compressed.sharded.U7
 store = DirectoryStoreV3("data/v3/1d.contiguous.compressed.sharded.U7.zarr")
-sharding_transformer = ShardingStorageTransformer("indexed", chunks_per_shard=(2,))
+sharding_transformer = ShardingStorageTransformer("indexed", chunks_per_shard=(1,))
 z = zarr.array(
     ["a", "b", "cc", "d"],
     dtype="U7",
@@ -290,7 +291,7 @@ z = zarr.array(
 
 # 1d.contiguous.compressed.sharded.S7
 store = DirectoryStoreV3("data/v3/1d.contiguous.compressed.sharded.S7.zarr")
-sharding_transformer = ShardingStorageTransformer("indexed", chunks_per_shard=(2,))
+sharding_transformer = ShardingStorageTransformer("indexed", chunks_per_shard=(1,))
 z = zarr.array(
     ["a", "b", "cc", "d"],
     dtype="S7",
@@ -302,7 +303,7 @@ z = zarr.array(
 
 # 1d.contiguous.compressed.sharded.b1
 store = DirectoryStoreV3("data/v3/1d.contiguous.compressed.sharded.b1.zarr")
-sharding_transformer = ShardingStorageTransformer("indexed", chunks_per_shard=(2,))
+sharding_transformer = ShardingStorageTransformer("indexed", chunks_per_shard=(1,))
 
 z = zarr.array(
     [True, False, True, False],
@@ -320,7 +321,7 @@ z = zarr.array(
     [1, 2, 3, 4],
     dtype="i2",
     store=store,
-    chunks=(2,),
+    chunks=(1,),
     compressor=Zlib(),
     storage_transformers=[sharding_transformer],
 )
@@ -332,7 +333,7 @@ z = zarr.array(
     [1, 2, 0, 0],
     dtype="i2",
     store=store,
-    chunks=(2,),
+    chunks=(1,),
     compressor=Zlib(),
     storage_transformers=[sharding_transformer],
 )
@@ -344,19 +345,31 @@ z = zarr.array(
     [1, 2, 3, 4, 5],
     dtype="i2",
     store=store,
-    chunks=(2,),
+    chunks=(1,),
     compressor=Zlib(),
     storage_transformers=[sharding_transformer],
 )
 
 # 2d.contiguous.compressed.sharded.i2
 store = DirectoryStoreV3("data/v3/2d.contiguous.compressed.sharded.i2.zarr")
-sharding_transformer = ShardingStorageTransformer("indexed", chunks_per_shard=(2, 2))
+sharding_transformer = ShardingStorageTransformer("indexed", chunks_per_shard=(1, 1))
 z = zarr.array(
     [[1, 2], [3, 4]],
     dtype="i2",
     store=store,
     chunks=(2, 2),
+    compressor=Zlib(),
+    storage_transformers=[sharding_transformer],
+)
+
+# 2d.chunked.compressed.sharded.i2
+store = DirectoryStoreV3("data/v3/2d.chunked.compressed.sharded.i2.zarr")
+sharding_transformer = ShardingStorageTransformer("indexed", chunks_per_shard=(2, 2))
+z = zarr.array(
+    arange(16).reshape(4, 4),
+    dtype="i2",
+    store=store,
+    chunks=(1, 1),
     compressor=Zlib(),
     storage_transformers=[sharding_transformer],
 )
@@ -368,19 +381,31 @@ z = zarr.array(
     [[1, 2, 3], [4, 5, 6], [7, 8, 9]],
     dtype="i2",
     store=store,
-    chunks=(2, 2),
+    chunks=(1, 1),
     compressor=Zlib(),
     storage_transformers=[sharding_transformer],
 )
 
 # 3d.contiguous.compressed.sharded
 store = DirectoryStoreV3("data/v3/3d.contiguous.compressed.sharded.i2.zarr")
-sharding_transformer = ShardingStorageTransformer("indexed", chunks_per_shard=(3, 3))
+sharding_transformer = ShardingStorageTransformer("indexed", chunks_per_shard=(3, 3, 3))
 z = zarr.array(
     arange(27).reshape(3, 3, 3),
     dtype="i2",
     store=store,
     chunks=(3, 3, 3),
+    compressor=Zlib(),
+    storage_transformers=[sharding_transformer],
+)
+
+# 3d.chunked.compressed.sharded
+store = DirectoryStoreV3("data/v3/3d.chunked.compressed.sharded.i2.zarr")
+sharding_transformer = ShardingStorageTransformer("indexed", chunks_per_shard=(2, 2, 2))
+z = zarr.array(
+    arange(64).reshape(4, 4, 4),
+    dtype="i2",
+    store=store,
+    chunks=(1, 1, 1),
     compressor=Zlib(),
     storage_transformers=[sharding_transformer],
 )

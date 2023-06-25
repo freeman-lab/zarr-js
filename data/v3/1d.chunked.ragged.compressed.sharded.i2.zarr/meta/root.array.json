@@ -2,7 +2,7 @@
     "attributes": {},
     "chunk_grid": {
         "chunk_shape": [
-            2
+            1
         ],
         "separator": "/",
         "type": "regular"

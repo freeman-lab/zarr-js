@@ -1,4 +1,4 @@
-const { gunzipSync } = require('fflate')
+const { gunzipSync, unzlibSync } = require('fflate')
 const ndarray = require('ndarray')
 const ops = require('ndarray-ops')
 const { parallel } = require('async')
@@ -54,34 +54,39 @@ const zarr = (request) => {
 
   const open = (path, cb, metadata) => {
     const onload = (metadata) => {
-      const keys = listKeys(metadata)
-      const isSharded = metadata.codecs[0].name == 'sharding_indexed'
-      const separator = metadata.chunk_key_encoding.configuration.separator
-      
+      const isSharded = metadata.storage_transformers &&
+      	metadata.storage_transformers[0].extension == 'https://purl.org/zarr/spec/storage_transformers/sharding/1.0' && 
+      	metadata.storage_transformers[0].type == 'indexed'
+      const arrayShape = metadata.shape
+      const chunkShape = isSharded ? 
+      	metadata.chunk_grid.chunk_shape.map((d, i) => d * metadata.storage_transformers[0].configuration.chunks_per_shard[i]) :
+      	metadata.chunk_grid.chunk_shape
+      const dataType = metadata.data_type
+      const separator = metadata.chunk_grid.separator
+      const fillValue = metadata.fill_value
+      const codec = metadata.compressor.codec
+      const keys = listKeys(arrayShape, chunkShape, separator)
+
       const getChunk = function (k, cb) {
         const key = k.join(separator)
         if (!keys.includes(key))
           return cb(new Error('storage key ' + key + ' not found', null))
-        loader(path + '/c/' + key, {}, 'arraybuffer', (err, res) => {
+        loader(path + '/data/root/c' + key, {}, 'arraybuffer', (err, res) => {
           if (err) return cb(err)
-          const chunk = parseChunk(res, metadata)
+          const chunk = parseChunk(res, dataType, chunkShape, fillValue, codec)
           cb(null, chunk)
         })
       }
 
       const getShardedChunk = async function (k, cb) {
       	const lookup = []
-      	const arrayShape = metadata.shape
-      	const chunkShape = metadata.chunk_grid.configuration.chunk_shape
+      	const chunksPerShard = metadata.storage_transformers[0].configuration.chunks_per_shard
       	for (let i = 0; i < arrayShape.length; i++) {
       		lookup.push(Math.floor(k[i] / chunkShape[i]))
       	}
       	const key = lookup.join(separator)
-      	const src = path + '/c/' + key
-      	const indexSize = 16 * metadata.codecs[0].configuration.chunk_shape
-      		.map((d, i) => d * metadata.chunk_grid.configuration.chunk_shape[i])
-      		.reduce((a, b) => a * b, 1)
-      	console.log(indexSize)
+      	const src = path + '/data/root/c' + key
+      	const indexSize = 16 * chunksPerShard.reduce((a, b) => a * b, 1)
 
       	if (!keys.includes(key))
           return cb(new Error('storage key ' + key + ' not found', null))
@@ -91,41 +96,21 @@ const zarr = (request) => {
 					if (contentLength) {
 						const fileSize = Number(contentLength)
 						const startRange = fileSize > indexSize ? fileSize - indexSize : 0
-						console.log(`bytes=${startRange}-${fileSize}`)
 						loader(src, {headers: {'Range': `bytes=${startRange}-${fileSize}`}}, 'arraybuffer', (err, res) => {
 							if (err) return cb(err)
-
-							let dataView = new DataView(res);
-
-							console.log(res)
-
-			        // Create a BigUint64Array with correct length
-			        let data = new BigUint64Array(res.byteLength / 8);
-			        for (let i = 0; i < data.length; i++) {
-			          // Get each 64-bit value in little-endian format
-			          data[i] = dataView.getBigInt64(i * 8, true); // true for little-endian
-			        }
-							console.log(data)
-							console.log(Buffer.isBuffer(res))
-							//const index = new BigUint64Array(Buffer.from(res).buffer)
-							//console.log(index)
+							const index = new BigUint64Array(Buffer.from(res).buffer)
+							// assume row-major order, we need to index into index
+							// based on the k we want and the chunkSize and the chunksPerShard
+							const start = 0
+							const range = `bytes=${index[start * 2]}-${index[start * 2] + index[start * 2 + 1]}`
+							loader(src, {headers: {'Range': range}}, 'arraybuffer', (err, res) => {
+								if (err) return cb(err)
+								const chunk = parseChunk(res, dataType, chunkShape, fillValue, codec)
+								cb(null, chunk)
+							})
 						})
 					}
 				})
-				
-
-		
-        // loader(, {}, 'arraybuffer'), (err, res) => {
-        // 	if (err) return cb(err)
-        // 	// extract index
-        		
-        // }
-
-        // loader(path + '/c/' + key, {}, 'arraybuffer', (err, res) => {
-        //   if (err) return cb(err)
-        //   const chunk = parseChunk(res, metadata)
-        //   cb(null, chunk)
-        // })
       }
 
       isSharded ? cb(null, getShardedChunk) : cb(null, getChunk)
@@ -133,7 +118,7 @@ const zarr = (request) => {
     if (metadata) {
       onload(metadata)
     } else {
-      loader(path + '/zarr.json', {}, 'text', (err, res) => {
+      loader(path + '/meta/root.array.json', {}, 'text', (err, res) => {
         if (err) return cb(err)
         const metadata = parseMetadata(res)
         onload(metadata)
@@ -147,49 +132,29 @@ const zarr = (request) => {
   }
 
   // parse a single zarr chunk
-  const parseChunk = (chunk, metadata) => {
-  	const isSharded = metadata.codecs[0].name === 'sharding_indexed'
+  const parseChunk = (chunk, dtype, chunkShape, fillValue, codec) => {
     if (chunk) {
       chunk = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk)
-      if (metadata.codecs.length > 0) {
-        if (
-        	metadata.codecs[0].name === 'gzip' || 
-        	(isSharded && metadata.codecs[0].configuration.codecs[0].name === 'gzip')
-        ) {
-          chunk = gunzipSync(chunk)
-        } else {
-          throw new Error(
-            'compressor ' + metadata.codecs[0].name + ' is not supported'
-          )
-        }
+      if (codec == 'https://purl.org/zarr/spec/codec/gzip/1.0') {
+        chunk = gunzipSync(chunk)
+      } else if (codec == 'https://purl.org/zarr/spec/codec/zlib/1.0') {
+      	chunk = unzlibSync(chunk)
+      } else {
+        throw new Error(
+          'compressor ' + compressor + ' is not supported'
+        )
       }
-      const dtype = metadata.data_type
       chunk = new constructors[dtype](chunk.buffer)
-
     } else {
-      const length = metadata.chunks.reduce((a, b) => a * b, 1)
-      chunk = Array(length).fill(metadata.fill_value)
+      const length = chunkShape.reduce((a, b) => a * b, 1)
+      chunk = Array(length).fill(fillValue)
     }
-
-    const chunkShape = isSharded ? 
-    	metadata.codecs[0].configuration.chunk_shape :
-    	metadata.chunk_grid.configuration.chunk_shape
     chunk = ndarray(chunk, chunkShape)
     return chunk
   }
 
-  // list keys of all storage keys based on metadata
-  const listKeys = (metadata) => {
-    if (metadata.chunk_grid.name != 'regular') {
-    	throw Error(`chunk grid ${metadata.chunk_grid.name} not supported`)
-    }
-    const arrayShape = metadata.shape
-    const chunkShape = metadata.chunk_grid.configuration.chunk_shape
-    const separator = metadata.chunk_key_encoding.configuration.separator
-    return expandedProduct(arrayShape, chunkShape, separator)
-  }
-
-  const expandedProduct = (arrayShape, chunkShape, separator) => {
+  // list all storage keys based on shape properties
+  const listKeys = (arrayShape, chunkShape, separator) => {
   	const zipped = []
   	for (let i = 0; i < arrayShape.length; i++) {
       const counts = []
@@ -206,12 +171,43 @@ const zarr = (request) => {
     return product(zipped).map((name) => name.join(separator))
   }
 
+  function StringArray(size, bytes) {
+    return (buffer) => {
+      const count = buffer.byteLength / (size * bytes)
+      const array = []
+      for (let s = 0; s < count; s++) {
+        const subuffer = buffer.slice(s * bytes * size, (s + 1) * bytes * size)
+        const substring = []
+        for (let c = 0; c < size; c++) {
+          const parsed = Buffer.from(
+            subuffer.slice(c * bytes, (c + 1) * bytes)
+          ).toString('utf8')
+          substring.push(parsed.replace(/\x00/g, ''))
+        }
+        array.push(substring.join(''))
+      }
+      return array
+    }
+  }
+
+  function BoolArray(buffer) {
+    const result = new Uint8Array(buffer)
+    return Array.from(result).map((d) => d === 1)
+  }
+
   const constructors = {
-    'uint8': Uint8Array,
-    'int16': Int16Array,
-    'int32': Int32Array,
-    'float32': Float32Array,
-    'float64': Float64Array,
+    '<i1': Int8Array,
+    '<u1': Uint8Array,
+    '|b1': BoolArray,
+    '|u1': Uint8Array,
+    '<i2': Int16Array,
+    '<u2': Uint16Array,
+    '<i4': Int32Array,
+    '<u4': Uint32Array,
+    '<f4': Float32Array,
+    '<f8': Float64Array,
+    '<U': StringArray,
+    '|S': StringArray,
   }
 
   return {
