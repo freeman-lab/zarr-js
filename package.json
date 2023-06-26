@@ -9,7 +9,7 @@
     "test-remote-v3": "tape test/v3.js remote | tap-spec",
     "test-local-v2": "tape test/v2.js local | tap-spec",
     "test-remote-v2": "tape test/v2.js remote | tap-spec",
-    "prettier": "prettier --write index.js"
+    "prettier": "prettier --write index.js src/v2.js src/v3.js test/v2.js test/v3.js" 
   },
   "author": "freeman-lab",
   "license": "MIT",
