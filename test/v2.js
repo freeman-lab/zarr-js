@@ -8,7 +8,7 @@ const args = process.argv
 
 const urlLocal = 'data/v2/'
 const urlRemote =
-  'https://storage.googleapis.com/carbonplan-share/testing/zarr-js/'
+  'https://storage.googleapis.com/carbonplan-share/testing/zarr-js/v2/'
 
 if (args.includes('local')) {
   run(zarrLocal, urlLocal, 'local')

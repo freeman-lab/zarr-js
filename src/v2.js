@@ -186,7 +186,6 @@ const zarr = (request) => {
       chunk = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk)
       if (metadata.compressor) {
         if (metadata.compressor.id === 'zlib') {
-          console.log(chunk)
           chunk = unzlibSync(chunk)
         } else {
           throw new Error(

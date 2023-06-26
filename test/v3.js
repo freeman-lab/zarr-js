@@ -7,7 +7,8 @@ const zarrRemote = require('../index')(fetch, 'v3')
 const args = process.argv
 
 const urlLocal = 'http://localhost:8080/data/v3/'
-const urlRemote = ''
+const urlRemote = 
+  'https://storage.googleapis.com/carbonplan-share/testing/zarr-js/v3/'
 
 if (args.includes('local')) {
   run(zarrLocal, urlLocal, 'local')
@@ -19,19 +20,19 @@ if (args.includes('remote')) {
 function run(zarr, prefix, mode) {
   test('1d.chunked.compressed.i2' + `.${mode}`, function (t) {
     zarr.open(prefix + '1d.chunked.compressed.i2.zarr', (err, get) => {
+      t.plan(2)
       get([0], (err, array) => {
         t.deepEqual(array.data, new Int16Array([1, 2]))
       })
       get([1], (err, array) => {
         t.deepEqual(array.data, new Int16Array([3, 4]))
-       
       })
-      t.end()
     })
   })
 
   test('1d.chunked.compressed.sharded.i2' + `.${mode}`, function (t) {
     zarr.open(prefix + '1d.chunked.compressed.sharded.i2.zarr', (err, get) => {
+      t.plan(4)
       get([0], (err, array) => {
         t.deepEqual(array.data, new Int16Array([1]))
       })
@@ -44,7 +45,6 @@ function run(zarr, prefix, mode) {
       get([3], (err, array) => {
         t.deepEqual(array.data, new Int16Array([4]))
       })
-      t.end()
     })
   })
 
@@ -140,6 +140,7 @@ function run(zarr, prefix, mode) {
 
   test('2d.chunked.compressed.i2' + `.${mode}`, function (t) {
     zarr.open(prefix + '2d.chunked.compressed.i2.zarr', (err, get) => {
+      t.plan(4)
       get([0,0], (err, array) => {
         t.deepEqual(array.data, new Int16Array([1]))
       })
@@ -152,12 +153,12 @@ function run(zarr, prefix, mode) {
       get([1,1], (err, array) => {
         t.deepEqual(array.data, new Int16Array([4]))
       })
-      t.end()
     })
   })
 
   test('2d.chunked.compressed.sharded.i2' + `.${mode}`, function (t) {
     zarr.open(prefix + '2d.chunked.compressed.sharded.i2.zarr', (err, get) => {
+      t.plan(16)
       get([0,0], (err, array) => {
         t.deepEqual(array.data, new Int16Array([0]))
       })
@@ -206,7 +207,6 @@ function run(zarr, prefix, mode) {
       get([3,3], (err, array) => {
         t.deepEqual(array.data, new Int16Array([15]))
       })
-      t.end()
     })
   })
 }
