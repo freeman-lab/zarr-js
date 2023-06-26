@@ -16,6 +16,7 @@ const zarr = (request) => {
     try {
       response = await request(src, options)
     } catch (err) {
+    	console.log(err)
       if (type === 'arraybuffer' && err.code === 'ENOENT') {
         return cb(null, null)
       } else {
@@ -74,6 +75,8 @@ const zarr = (request) => {
         const key = k.join(separator)
         if (!keys.includes(key))
           return cb(new Error('storage key ' + key + ' not found', null))
+        
+        // fetch the chunk
         loader(path + '/data/root/c' + key, {}, 'arraybuffer', (err, res) => {
           if (err) return cb(err)
           const chunk = parseChunk(res, dataType, chunkShape, fillValue, codec)
@@ -93,11 +96,10 @@ const zarr = (request) => {
       	const key = lookup.join(separator)
       	const src = path + '/data/root/c' + key
       	const indexSize = 16 * chunksPerShard.reduce((a, b) => a * b, 1)
-
       	if (!keys.includes(key))
           return cb(new Error('storage key ' + key + ' not found', null))
 
-        // use a fetch to get file size
+        // use an initial fetch to get file size
 				request(src, {method: 'HEAD'}).then((res) => {
 					const contentLength = res.headers.get('Content-Length')
 					if (contentLength) {
@@ -207,18 +209,11 @@ const zarr = (request) => {
   }
 
   const constructors = {
-    '<i1': Int8Array,
-    '<u1': Uint8Array,
-    '|b1': BoolArray,
-    '|u1': Uint8Array,
+    'u1': Uint8Array,
     '<i2': Int16Array,
-    '<u2': Uint16Array,
     '<i4': Int32Array,
-    '<u4': Uint32Array,
     '<f4': Float32Array,
     '<f8': Float64Array,
-    '<U': StringArray,
-    '|S': StringArray,
   }
 
   return {
