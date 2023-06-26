@@ -4,7 +4,7 @@
   "description": "load chunked binary zarr files in javascript",
   "main": "index.js",
   "scripts": {
-    "test": "npm run test-local-v2 && npm run test-remote-v2 && npm run test-remote-v3",
+    "test": "npm run test-remote-v2 && npm run test-remote-v3",
     "test-local-v3": "tape test/v3.js local | tap-spec",
     "test-remote-v3": "tape test/v3.js remote | tap-spec",
     "test-local-v2": "tape test/v2.js local | tap-spec",
