@@ -32,8 +32,7 @@ const zarr = require('./index.js')(fetch, 'v3')
 
 // open an array and load chunks on demand
 zarr.open('http://localhost:8080/v3/2d.chunked.compressed.sharded.filled.i2.zarr', (err, get) => {
-
-  get([1,1], function (err, array) {
+  get([0,0], function (err, array) {
     console.log(err)
     console.log(array.data)
   })

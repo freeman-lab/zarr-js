@@ -11,6 +11,8 @@ const zarr = (request) => {
   }
   if (!request) throw new Error('no request function defined')
 
+  const indexCache = {}
+
   const loader = async (src, options, type, cb) => {
     let response
     try {
@@ -115,71 +117,80 @@ const zarr = (request) => {
         if (!keys.includes(key))
           return cb(new Error('storage key ' + key + ' not found', null))
 
-        // use an initial fetch to get file size
-        request(src, { method: 'HEAD' }).then((res) => {
-          const contentLength = res.headers.get('Content-Length')
-          if (contentLength) {
-            const fileSize = Number(contentLength)
-            // get index byte range according to sharding spec
-            const startRange = fileSize - indexSize
+        // load a shard using the index
+        const getUsingIndex = (index) => {
+          // index into the index to load the requested chunk
+          const start = k
+            .map((d, i) => d % chunksPerShard[i]) // express for a single shard
+            .map((d, i) =>
+              i == chunksPerShard.length - 1 ? d : d * chunksPerShard[i]
+            )
+            .reduce((a, b) => a + b, 0) // convert to linear index
+          // write null chunk when 2^64-1 indicates fill value
+          if (
+            index[start * 2] === 18446744073709551615n &&
+            index[start * 2 + 1] === 18446744073709551615n
+          ) {
+            const chunk = parseChunk(
+              null,
+              dataType,
+              chunkShape,
+              fillValue,
+              codec
+            )
+            cb(null, chunk)
+          } else {
+            const range = `bytes=${index[start * 2]}-${
+              parseInt(index[start * 2] + index[start * 2 + 1]) - 1
+            }`
+            // finally load the chunk
             loader(
               src,
-              {
-                headers: {
-                  Range: `bytes=${startRange}-${fileSize - checksumSize - 1}`,
-                },
-              },
+              { headers: { Range: range } },
               'arraybuffer',
               (err, res) => {
                 if (err) return cb(err)
-                const index = new BigUint64Array(Buffer.from(res).buffer)
-                // index into the index to load the requested chunk
-                const start = k
-                  .map((d, i) => d % chunksPerShard[i]) // express for a single shard
-                  .map((d, i) =>
-                    i == chunksPerShard.length - 1 ? d : d * chunksPerShard[i]
-                  )
-                  .reduce((a, b) => a + b, 0) // convert to linear index
-                // write null chunk when 2^64-1 indicates fill value
-                if (
-                  index[start * 2] === 18446744073709551615n &&
-                  index[start * 2 + 1] === 18446744073709551615n
-                ) {
-                  const chunk = parseChunk(
-                    null,
-                    dataType,
-                    chunkShape,
-                    fillValue,
-                    codec
-                  )
-                  cb(null, chunk)
-                } else {
-                  const range = `bytes=${index[start * 2]}-${
-                    parseInt(index[start * 2] + index[start * 2 + 1]) - 1
-                  }`
-
-                  // finally load the chunk
-                  loader(
-                    src,
-                    { headers: { Range: range } },
-                    'arraybuffer',
-                    (err, res) => {
-                      if (err) return cb(err)
-                      const chunk = parseChunk(
-                        res,
-                        dataType,
-                        chunkShape,
-                        fillValue,
-                        codec
-                      )
-                      cb(null, chunk)
-                    }
-                  )
-                }
+                const chunk = parseChunk(
+                  res,
+                  dataType,
+                  chunkShape,
+                  fillValue,
+                  codec
+                )
+                cb(null, chunk)
               }
             )
           }
-        })
+        }
+
+        // load index from cache or fetch using file size
+        if (indexCache[key]) {
+          getUsingIndex(indexCache[key])
+        } else {
+          request(src, { method: 'HEAD' }).then((res) => {
+            const contentLength = res.headers.get('Content-Length')
+            if (contentLength) {
+              const fileSize = Number(contentLength)
+              // get index byte range according to sharding spec
+              const startRange = fileSize - indexSize
+              loader(
+                src,
+                {
+                  headers: {
+                    Range: `bytes=${startRange}-${fileSize - checksumSize - 1}`,
+                  },
+                },
+                'arraybuffer',
+                (err, res) => {
+                  if (err) return cb(err)
+                  const index = new BigUint64Array(Buffer.from(res).buffer)
+                  indexCache[key] = index
+                  getUsingIndex(indexCache[key])
+                }
+              )
+            }
+          })
+        }
       }
 
       isSharded ? cb(null, getShardedChunk) : cb(null, getChunk)
