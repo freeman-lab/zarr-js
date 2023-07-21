@@ -16,7 +16,6 @@ const zarr = (request) => {
     try {
       response = await request(src, options)
     } catch (err) {
-      console.log(err)
       if (type === 'arraybuffer' && err.code === 'ENOENT') {
         return cb(null, null)
       } else {
@@ -59,23 +58,17 @@ const zarr = (request) => {
 
   const open = (path, cb, metadata) => {
     const onload = (metadata) => {
-      const isSharded =
-        metadata.storage_transformers &&
-        metadata.storage_transformers[0].extension ==
-          'https://purl.org/zarr/spec/storage_transformers/sharding/1.0' &&
-        metadata.storage_transformers[0].type == 'indexed'
+      const isSharded = metadata.codecs[0].name == 'sharding_indexed'
       const arrayShape = metadata.shape
       const chunkShape = isSharded
-        ? metadata.chunk_grid.chunk_shape.map(
-            (d, i) =>
-              d *
-              metadata.storage_transformers[0].configuration.chunks_per_shard[i]
-          )
-        : metadata.chunk_grid.chunk_shape
+        ? metadata.codecs[0].configuration.chunk_shape
+        : metadata.chunk_grid.configuration.chunk_shape
       const dataType = metadata.data_type
-      const separator = metadata.chunk_grid.separator
+      const separator = metadata.chunk_key_encoding.configuration.separator
       const fillValue = metadata.fill_value
-      const codec = metadata.compressor.codec
+      const codec = isSharded
+        ? metadata.codecs[0].configuration.codecs[0]
+        : metadata.codecs[0]
       const keys = listKeys(arrayShape, chunkShape, separator)
 
       const getChunk = function (k, cb) {
@@ -91,7 +84,7 @@ const zarr = (request) => {
           return cb(new Error('storage key ' + key + ' not found', null))
 
         // fetch the chunk
-        loader(path + '/data/root/c' + key, {}, 'arraybuffer', (err, res) => {
+        loader(path + '/c/' + key, {}, 'arraybuffer', (err, res) => {
           if (err) return cb(err)
           const chunk = parseChunk(res, dataType, chunkShape, fillValue, codec)
           cb(null, chunk)
@@ -108,13 +101,17 @@ const zarr = (request) => {
         }
         const lookup = []
         const chunksPerShard =
-          metadata.storage_transformers[0].configuration.chunks_per_shard
+          metadata.chunk_grid.configuration.chunk_shape.map((d, i) => {
+            return d / chunkShape[i]
+          })
         for (let i = 0; i < k.length; i++) {
-          lookup.push(Math.floor(k[i] / chunkShape[i]))
+          lookup.push(Math.floor(k[i] / chunksPerShard[i]))
         }
         const key = lookup.join(separator)
-        const src = path + '/data/root/c' + key
-        const indexSize = 16 * chunksPerShard.reduce((a, b) => a * b, 1)
+        const src = path + '/c/' + key
+        const checksumSize = 4
+        const indexSize =
+          16 * chunksPerShard.reduce((a, b) => a * b, 1) + checksumSize
         if (!keys.includes(key))
           return cb(new Error('storage key ' + key + ' not found', null))
 
@@ -124,10 +121,14 @@ const zarr = (request) => {
           if (contentLength) {
             const fileSize = Number(contentLength)
             // get index byte range according to sharding spec
-            const startRange = fileSize > indexSize ? fileSize - indexSize : 0
+            const startRange = fileSize - indexSize
             loader(
               src,
-              { headers: { Range: `bytes=${startRange}-${fileSize}` } },
+              {
+                headers: {
+                  Range: `bytes=${startRange}-${fileSize - checksumSize - 1}`,
+                },
+              },
               'arraybuffer',
               (err, res) => {
                 if (err) return cb(err)
@@ -139,26 +140,42 @@ const zarr = (request) => {
                     i == chunksPerShard.length - 1 ? d : d * chunksPerShard[i]
                   )
                   .reduce((a, b) => a + b, 0) // convert to linear index
-                const range = `bytes=${index[start * 2]}-${
-                  index[start * 2] + index[start * 2 + 1]
-                }`
-                // finally load the chunk
-                loader(
-                  src,
-                  { headers: { Range: range } },
-                  'arraybuffer',
-                  (err, res) => {
-                    if (err) return cb(err)
-                    const chunk = parseChunk(
-                      res,
-                      dataType,
-                      chunkShape,
-                      fillValue,
-                      codec
-                    )
-                    cb(null, chunk)
-                  }
-                )
+                // write null chunk when 2^64-1 indicates fill value
+                if (
+                  index[start * 2] === 18446744073709551615n &&
+                  index[start * 2 + 1] === 18446744073709551615n
+                ) {
+                  const chunk = parseChunk(
+                    null,
+                    dataType,
+                    chunkShape,
+                    fillValue,
+                    codec
+                  )
+                  cb(null, chunk)
+                } else {
+                  const range = `bytes=${index[start * 2]}-${
+                    parseInt(index[start * 2] + index[start * 2 + 1]) - 1
+                  }`
+
+                  // finally load the chunk
+                  loader(
+                    src,
+                    { headers: { Range: range } },
+                    'arraybuffer',
+                    (err, res) => {
+                      if (err) return cb(err)
+                      const chunk = parseChunk(
+                        res,
+                        dataType,
+                        chunkShape,
+                        fillValue,
+                        codec
+                      )
+                      cb(null, chunk)
+                    }
+                  )
+                }
               }
             )
           }
@@ -170,7 +187,7 @@ const zarr = (request) => {
     if (metadata) {
       onload(metadata)
     } else {
-      loader(path + '/meta/root.array.json', {}, 'text', (err, res) => {
+      loader(path + '/zarr.json', {}, 'text', (err, res) => {
         if (err) return cb(err)
         const metadata = parseMetadata(res)
         onload(metadata)
@@ -187,9 +204,9 @@ const zarr = (request) => {
   const parseChunk = (chunk, dtype, chunkShape, fillValue, codec) => {
     if (chunk) {
       chunk = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk)
-      if (codec == 'https://purl.org/zarr/spec/codec/gzip/1.0') {
+      if (codec.name == 'gzip') {
         chunk = gunzipSync(chunk)
-      } else if (codec == 'https://purl.org/zarr/spec/codec/zlib/1.0') {
+      } else if (codec.name == 'blosc' && codec.configuration.cname == 'zlib') {
         chunk = unzlibSync(chunk)
       } else {
         throw new Error('compressor ' + compressor + ' is not supported')
@@ -197,7 +214,7 @@ const zarr = (request) => {
       chunk = new constructors[dtype](chunk.buffer)
     } else {
       const length = chunkShape.reduce((a, b) => a * b, 1)
-      chunk = Array(length).fill(fillValue)
+      chunk = new constructors[dtype](length).fill(fillValue)
     }
     chunk = ndarray(chunk, chunkShape)
     return chunk
@@ -221,36 +238,12 @@ const zarr = (request) => {
     return product(zipped).map((name) => name.join(separator))
   }
 
-  function StringArray(size, bytes) {
-    return (buffer) => {
-      const count = buffer.byteLength / (size * bytes)
-      const array = []
-      for (let s = 0; s < count; s++) {
-        const subuffer = buffer.slice(s * bytes * size, (s + 1) * bytes * size)
-        const substring = []
-        for (let c = 0; c < size; c++) {
-          const parsed = Buffer.from(
-            subuffer.slice(c * bytes, (c + 1) * bytes)
-          ).toString('utf8')
-          substring.push(parsed.replace(/\x00/g, ''))
-        }
-        array.push(substring.join(''))
-      }
-      return array
-    }
-  }
-
-  function BoolArray(buffer) {
-    const result = new Uint8Array(buffer)
-    return Array.from(result).map((d) => d === 1)
-  }
-
   const constructors = {
-    u1: Uint8Array,
-    '<i2': Int16Array,
-    '<i4': Int32Array,
-    '<f4': Float32Array,
-    '<f8': Float64Array,
+    uint8: Uint8Array,
+    int16: Int16Array,
+    int32: Int32Array,
+    float32: Float32Array,
+    float64: Float64Array,
   }
 
   return {

@@ -6,7 +6,7 @@ const zarrRemote = require('../index')(fetch, 'v3')
 
 const args = process.argv
 
-const urlLocal = 'http://localhost:8080/data/v3/'
+const urlLocal = 'http://localhost:8080/v3/'
 const urlRemote =
   'https://storage.googleapis.com/carbonplan-share/testing/zarr-js/v3/'
 
@@ -175,53 +175,110 @@ function run(zarr, prefix, mode) {
     zarr.open(prefix + '2d.chunked.compressed.sharded.i2.zarr', (err, get) => {
       t.plan(16)
       get([0, 0], (err, array) => {
-        t.deepEqual(array.data, new Int16Array([0]))
-      })
-      get([0, 1], (err, array) => {
         t.deepEqual(array.data, new Int16Array([1]))
       })
-      get([0, 2], (err, array) => {
+      get([0, 1], (err, array) => {
         t.deepEqual(array.data, new Int16Array([2]))
       })
-      get([0, 3], (err, array) => {
+      get([0, 2], (err, array) => {
         t.deepEqual(array.data, new Int16Array([3]))
       })
-      get([1, 0], (err, array) => {
+      get([0, 3], (err, array) => {
         t.deepEqual(array.data, new Int16Array([4]))
       })
-      get([1, 1], (err, array) => {
+      get([1, 0], (err, array) => {
         t.deepEqual(array.data, new Int16Array([5]))
       })
-      get([1, 2], (err, array) => {
+      get([1, 1], (err, array) => {
         t.deepEqual(array.data, new Int16Array([6]))
       })
-      get([1, 3], (err, array) => {
+      get([1, 2], (err, array) => {
         t.deepEqual(array.data, new Int16Array([7]))
       })
-      get([2, 0], (err, array) => {
+      get([1, 3], (err, array) => {
         t.deepEqual(array.data, new Int16Array([8]))
       })
-      get([2, 1], (err, array) => {
+      get([2, 0], (err, array) => {
         t.deepEqual(array.data, new Int16Array([9]))
       })
-      get([2, 2], (err, array) => {
+      get([2, 1], (err, array) => {
         t.deepEqual(array.data, new Int16Array([10]))
       })
-      get([2, 3], (err, array) => {
+      get([2, 2], (err, array) => {
         t.deepEqual(array.data, new Int16Array([11]))
       })
-      get([3, 0], (err, array) => {
+      get([2, 3], (err, array) => {
         t.deepEqual(array.data, new Int16Array([12]))
       })
-      get([3, 1], (err, array) => {
+      get([3, 0], (err, array) => {
         t.deepEqual(array.data, new Int16Array([13]))
       })
-      get([3, 2], (err, array) => {
+      get([3, 1], (err, array) => {
         t.deepEqual(array.data, new Int16Array([14]))
       })
-      get([3, 3], (err, array) => {
+      get([3, 2], (err, array) => {
         t.deepEqual(array.data, new Int16Array([15]))
       })
+      get([3, 3], (err, array) => {
+        t.deepEqual(array.data, new Int16Array([16]))
+      })
     })
+  })
+
+  test('2d.chunked.compressed.sharded.filled.i2' + `.${mode}`, function (t) {
+    zarr.open(
+      prefix + '2d.chunked.compressed.sharded.filled.i2.zarr',
+      (err, get) => {
+        t.plan(16)
+        get([0, 0], (err, array) => {
+          t.deepEqual(array.data, new Int16Array([0]))
+        })
+        get([0, 1], (err, array) => {
+          t.deepEqual(array.data, new Int16Array([1]))
+        })
+        get([0, 2], (err, array) => {
+          t.deepEqual(array.data, new Int16Array([2]))
+        })
+        get([0, 3], (err, array) => {
+          t.deepEqual(array.data, new Int16Array([3]))
+        })
+        get([1, 0], (err, array) => {
+          t.deepEqual(array.data, new Int16Array([4]))
+        })
+        get([1, 1], (err, array) => {
+          t.deepEqual(array.data, new Int16Array([5]))
+        })
+        get([1, 2], (err, array) => {
+          t.deepEqual(array.data, new Int16Array([6]))
+        })
+        get([1, 3], (err, array) => {
+          t.deepEqual(array.data, new Int16Array([7]))
+        })
+        get([2, 0], (err, array) => {
+          t.deepEqual(array.data, new Int16Array([8]))
+        })
+        get([2, 1], (err, array) => {
+          t.deepEqual(array.data, new Int16Array([9]))
+        })
+        get([2, 2], (err, array) => {
+          t.deepEqual(array.data, new Int16Array([10]))
+        })
+        get([2, 3], (err, array) => {
+          t.deepEqual(array.data, new Int16Array([11]))
+        })
+        get([3, 0], (err, array) => {
+          t.deepEqual(array.data, new Int16Array([12]))
+        })
+        get([3, 1], (err, array) => {
+          t.deepEqual(array.data, new Int16Array([13]))
+        })
+        get([3, 2], (err, array) => {
+          t.deepEqual(array.data, new Int16Array([14]))
+        })
+        get([3, 3], (err, array) => {
+          t.deepEqual(array.data, new Int16Array([15]))
+        })
+      }
+    )
   })
 }

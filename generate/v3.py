@@ -13,7 +13,7 @@ a = asyncio.run(
         shape=data.shape,
         dtype=data.dtype,
         chunk_shape=(4,),
-        codecs=[zarrita.codecs.blosc_codec(typesize=data.dtype.itemsize, cname="zlib")],
+        codecs=[zarrita.codecs.gzip_codec()],
     )
 )
 a[:] = data
@@ -27,6 +27,7 @@ a = asyncio.run(
         shape=data.shape,
         dtype=data.dtype,
         chunk_shape=(4,),
+        codecs=[zarrita.codecs.gzip_codec()],
     )
 )
 a[:] = data
@@ -40,7 +41,7 @@ a = asyncio.run(
         shape=data.shape,
         dtype=data.dtype,
         chunk_shape=(4,),
-        codecs=[zarrita.codecs.blosc_codec(typesize=data.dtype.itemsize, cname="zlib")],
+        codecs=[zarrita.codecs.gzip_codec()],
     )
 )
 a[:] = data
@@ -54,7 +55,7 @@ a = asyncio.run(
         shape=data.shape,
         dtype=data.dtype,
         chunk_shape=(4,),
-        codecs=[zarrita.codecs.blosc_codec(typesize=data.dtype.itemsize, cname="zlib")],
+        codecs=[zarrita.codecs.gzip_codec()],
     )
 )
 a[:] = data
@@ -69,7 +70,7 @@ a = asyncio.run(
         shape=data.shape,
         dtype=data.dtype,
         chunk_shape=(4,),
-        codecs=[zarrita.codecs.blosc_codec(typesize=data.dtype.itemsize, cname="zlib")],
+        codecs=[zarrita.codecs.gzip_codec()],
     )
 )
 a[:] = data
@@ -97,7 +98,7 @@ a = asyncio.run(
         shape=data.shape,
         dtype=data.dtype,
         chunk_shape=(4,),
-        codecs=[zarrita.codecs.blosc_codec(typesize=data.dtype.itemsize, cname="zlib")],
+        codecs=[zarrita.codecs.gzip_codec()],
     )
 )
 a[:] = data
@@ -111,6 +112,7 @@ a = asyncio.run(
         shape=data.shape,
         dtype="bool",
         chunk_shape=(4,),
+        codecs=[zarrita.codecs.gzip_codec()],
     )
 )
 a[:] = data
@@ -124,7 +126,7 @@ a = asyncio.run(
         shape=data.shape,
         dtype="bool",
         chunk_shape=(4,),
-        codecs=[zarrita.codecs.blosc_codec(typesize=data.dtype.itemsize, cname="zlib")],
+        codecs=[zarrita.codecs.gzip_codec()],
     )
 )
 a[:] = data
@@ -138,6 +140,7 @@ a = asyncio.run(
         shape=data.shape,
         dtype=data.dtype,
         chunk_shape=(4,),
+        codecs=[zarrita.codecs.gzip_codec()],
     )
 )
 a[:] = data
@@ -152,7 +155,7 @@ a = asyncio.run(
         shape=data.shape,
         dtype=data.dtype,
         chunk_shape=(2,),
-        codecs=[zarrita.codecs.blosc_codec(typesize=data.dtype.itemsize, cname="zlib")],
+        codecs=[zarrita.codecs.gzip_codec()],
     )
 )
 a[:] = data
@@ -166,7 +169,7 @@ a = asyncio.run(
         shape=data.shape,
         dtype=data.dtype,
         chunk_shape=(2,),
-        codecs=[zarrita.codecs.blosc_codec(typesize=data.dtype.itemsize, cname="zlib")],
+        codecs=[zarrita.codecs.gzip_codec()],
     )
 )
 a[:] = data
@@ -180,7 +183,7 @@ a = asyncio.run(
         shape=data.shape,
         dtype=data.dtype,
         chunk_shape=(2,),
-        codecs=[zarrita.codecs.blosc_codec(typesize=data.dtype.itemsize, cname="zlib")],
+        codecs=[zarrita.codecs.gzip_codec()],
     )
 )
 a[:] = data
@@ -194,7 +197,7 @@ a = asyncio.run(
         shape=data.shape,
         dtype=data.dtype,
         chunk_shape=(2, 2),
-        codecs=[zarrita.codecs.blosc_codec(typesize=data.dtype.itemsize, cname="zlib")],
+        codecs=[zarrita.codecs.gzip_codec()],
     )
 )
 a[:, :] = data
@@ -208,7 +211,7 @@ a = asyncio.run(
         shape=data.shape,
         dtype=data.dtype,
         chunk_shape=(1, 1),
-        codecs=[zarrita.codecs.blosc_codec(typesize=data.dtype.itemsize, cname="zlib")],
+        codecs=[zarrita.codecs.gzip_codec()],
     )
 )
 a[:, :] = data
@@ -222,7 +225,7 @@ a = asyncio.run(
         shape=data.shape,
         dtype=data.dtype,
         chunk_shape=(2, 2),
-        codecs=[zarrita.codecs.blosc_codec(typesize=data.dtype.itemsize, cname="zlib")],
+        codecs=[zarrita.codecs.gzip_codec()],
     )
 )
 a[:, :] = data
@@ -236,7 +239,7 @@ a = asyncio.run(
         shape=data.shape,
         dtype=data.dtype,
         chunk_shape=(3, 3, 3),
-        codecs=[zarrita.codecs.blosc_codec(typesize=data.dtype.itemsize, cname="zlib")],
+        codecs=[zarrita.codecs.gzip_codec()],
     )
 )
 a[:, :, :] = data
@@ -250,7 +253,7 @@ a = asyncio.run(
         shape=data.shape,
         dtype=data.dtype,
         chunk_shape=(2, 2, 2),
-        codecs=[zarrita.codecs.blosc_codec(typesize=data.dtype.itemsize, cname="zlib")],
+        codecs=[zarrita.codecs.gzip_codec()],
     )
 )
 a[:, :, :] = data
@@ -264,7 +267,7 @@ a = asyncio.run(
         shape=data.shape,
         dtype=data.dtype,
         chunk_shape=(3, 3, 1),
-        codecs=[zarrita.codecs.blosc_codec(typesize=data.dtype.itemsize, cname="zlib")],
+        codecs=[zarrita.codecs.gzip_codec()],
     )
 )
 a[:, :, :] = data
@@ -279,7 +282,7 @@ a = g.create_array(
     shape=data_a.shape,
     dtype=data_a.dtype,
     chunk_shape=(4,),
-    codecs=[zarrita.codecs.blosc_codec(typesize=data_a.dtype.itemsize, cname="zlib")],
+    codecs=[zarrita.codecs.gzip_codec()],
 )
 a[:] = data_a
 b = g.create_array(
@@ -287,7 +290,7 @@ b = g.create_array(
     shape=data_b.shape,
     dtype=data_b.dtype,
     chunk_shape=(4,),
-    codecs=[zarrita.codecs.blosc_codec(typesize=data_b.dtype.itemsize, cname="zlib")],
+    codecs=[zarrita.codecs.gzip_codec()],
 )
 b[:] = data_b
 
@@ -306,9 +309,7 @@ a = asyncio.run(
             zarrita.codecs.sharding_codec(
                 chunk_shape=(4,),
                 codecs=[
-                    zarrita.codecs.blosc_codec(
-                        typesize=data.dtype.itemsize, cname="zlib"
-                    )
+                    zarrita.codecs.gzip_codec()
                 ],
             )
         ],
@@ -329,9 +330,7 @@ a = asyncio.run(
             zarrita.codecs.sharding_codec(
                 chunk_shape=(4,),
                 codecs=[
-                    zarrita.codecs.blosc_codec(
-                        typesize=data.dtype.itemsize, cname="zlib"
-                    )
+                    zarrita.codecs.gzip_codec()
                 ],
             )
         ],
@@ -352,9 +351,7 @@ a = asyncio.run(
             zarrita.codecs.sharding_codec(
                 chunk_shape=(4,),
                 codecs=[
-                    zarrita.codecs.blosc_codec(
-                        typesize=data.dtype.itemsize, cname="zlib"
-                    )
+                    zarrita.codecs.gzip_codec()
                 ],
             )
         ],
@@ -376,9 +373,7 @@ a = asyncio.run(
             zarrita.codecs.sharding_codec(
                 chunk_shape=(4,),
                 codecs=[
-                    zarrita.codecs.blosc_codec(
-                        typesize=data.dtype.itemsize, cname="zlib"
-                    )
+                    zarrita.codecs.gzip_codec()
                 ],
             )
         ],
@@ -399,9 +394,7 @@ a = asyncio.run(
             zarrita.codecs.sharding_codec(
                 chunk_shape=(4,),
                 codecs=[
-                    zarrita.codecs.blosc_codec(
-                        typesize=data.dtype.itemsize, cname="zlib"
-                    )
+                    zarrita.codecs.gzip_codec()
                 ],
             )
         ],
@@ -423,9 +416,7 @@ a = asyncio.run(
             zarrita.codecs.sharding_codec(
                 chunk_shape=(4,),
                 codecs=[
-                    zarrita.codecs.blosc_codec(
-                        typesize=data.dtype.itemsize, cname="zlib"
-                    )
+                    zarrita.codecs.gzip_codec()
                 ],
             )
         ],
@@ -446,9 +437,7 @@ a = asyncio.run(
             zarrita.codecs.sharding_codec(
                 chunk_shape=(1,),
                 codecs=[
-                    zarrita.codecs.blosc_codec(
-                        typesize=data.dtype.itemsize, cname="zlib"
-                    )
+                    zarrita.codecs.gzip_codec()
                 ],
             )
         ],
@@ -469,9 +458,7 @@ a = asyncio.run(
             zarrita.codecs.sharding_codec(
                 chunk_shape=(1,),
                 codecs=[
-                    zarrita.codecs.blosc_codec(
-                        typesize=data.dtype.itemsize, cname="zlib"
-                    )
+                    zarrita.codecs.gzip_codec()
                 ],
             )
         ],
@@ -493,7 +480,7 @@ a[:] = data
 #                 chunk_shape=(1,),
 #                 codecs=[
 #                     zarrita.codecs.blosc_codec(
-#                         typesize=data.dtype.itemsize, cname="zlib"
+#                         typesize=data.dtype.itemsize, cname="gzip"
 #                     )
 #                 ],
 #             )
@@ -515,9 +502,28 @@ a = asyncio.run(
             zarrita.codecs.sharding_codec(
                 chunk_shape=(2, 2),
                 codecs=[
-                    zarrita.codecs.blosc_codec(
-                        typesize=data.dtype.itemsize, cname="zlib"
-                    )
+                    zarrita.codecs.gzip_codec()
+                ],
+            )
+        ],
+    )
+)
+a[:, :] = data
+
+# 2d.chunked.compressed.sharded.filled.i2
+data = arange(16, dtype="i2").reshape(4, 4)
+path = "2d.chunked.compressed.sharded.filled.i2.zarr"
+a = asyncio.run(
+    zarrita.Array.create_async(
+        store / path,
+        shape=data.shape,
+        dtype=data.dtype,
+        chunk_shape=(2, 2),
+        codecs=[
+            zarrita.codecs.sharding_codec(
+                chunk_shape=(1, 1),
+                codecs=[
+                    zarrita.codecs.gzip_codec()
                 ],
             )
         ],
@@ -526,7 +532,7 @@ a = asyncio.run(
 a[:, :] = data
 
 # 2d.chunked.compressed.sharded.i2
-data = arange(16, dtype="i2").reshape(4, 4)
+data = arange(16, dtype="i2").reshape(4, 4) + 1
 path = "2d.chunked.compressed.sharded.i2.zarr"
 a = asyncio.run(
     zarrita.Array.create_async(
@@ -538,9 +544,7 @@ a = asyncio.run(
             zarrita.codecs.sharding_codec(
                 chunk_shape=(1, 1),
                 codecs=[
-                    zarrita.codecs.blosc_codec(
-                        typesize=data.dtype.itemsize, cname="zlib"
-                    )
+                    zarrita.codecs.gzip_codec()
                 ],
             )
         ],
@@ -561,9 +565,7 @@ a = asyncio.run(
             zarrita.codecs.sharding_codec(
                 chunk_shape=(1, 1),
                 codecs=[
-                    zarrita.codecs.blosc_codec(
-                        typesize=data.dtype.itemsize, cname="zlib"
-                    )
+                    zarrita.codecs.gzip_codec()
                 ],
             )
         ],
@@ -585,9 +587,7 @@ a = asyncio.run(
             zarrita.codecs.sharding_codec(
                 chunk_shape=(3, 3, 3),
                 codecs=[
-                    zarrita.codecs.blosc_codec(
-                        typesize=data.dtype.itemsize, cname="zlib"
-                    )
+                    zarrita.codecs.gzip_codec()
                 ],
             )
         ],
@@ -608,9 +608,7 @@ a = asyncio.run(
             zarrita.codecs.sharding_codec(
                 chunk_shape=(1, 1, 1),
                 codecs=[
-                    zarrita.codecs.blosc_codec(
-                        typesize=data.dtype.itemsize, cname="zlib"
-                    )
+                    zarrita.codecs.gzip_codec()
                 ],
             )
         ],
@@ -631,9 +629,7 @@ a = asyncio.run(
             zarrita.codecs.sharding_codec(
                 chunk_shape=(3, 3, 1),
                 codecs=[
-                    zarrita.codecs.blosc_codec(
-                        typesize=data.dtype.itemsize, cname="zlib"
-                    )
+                    zarrita.codecs.gzip_codec()
                 ],
             )
         ],
@@ -656,7 +652,7 @@ a = g.create_array(
         zarrita.codecs.sharding_codec(
             chunk_shape=(4,),
             codecs=[
-                zarrita.codecs.blosc_codec(typesize=data_a.dtype.itemsize, cname="zlib")
+                zarrita.codecs.gzip_codec()
             ],
         )
     ],
@@ -671,7 +667,7 @@ b = g.create_array(
         zarrita.codecs.sharding_codec(
             chunk_shape=(4,),
             codecs=[
-                zarrita.codecs.blosc_codec(typesize=data_b.dtype.itemsize, cname="zlib")
+                zarrita.codecs.gzip_codec()
             ],
         )
     ],
