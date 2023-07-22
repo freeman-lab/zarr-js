@@ -11,8 +11,6 @@ const zarr = (request) => {
   }
   if (!request) throw new Error('no request function defined')
 
-  const indexCache = {}
-
   const loader = async (src, options, type, cb) => {
     let response
     try {
@@ -59,6 +57,8 @@ const zarr = (request) => {
   }
 
   const open = (path, cb, metadata) => {
+    const indexCache = {}
+
     const onload = (metadata) => {
       const isSharded = metadata.codecs[0].name == 'sharding_indexed'
       const arrayShape = metadata.shape
@@ -119,13 +119,10 @@ const zarr = (request) => {
 
         // load a shard using the index
         const getUsingIndex = (index) => {
-          // index into the index to load the requested chunk
-          const start = k
-            .map((d, i) => d % chunksPerShard[i]) // express for a single shard
-            .map((d, i) =>
-              i == chunksPerShard.length - 1 ? d : d * chunksPerShard[i]
-            )
-            .reduce((a, b) => a + b, 0) // convert to linear index
+          // modulo index to get index for a single shard
+          const reducedKey = k.map((d, i) => d % chunksPerShard[i])
+          // linearize index
+          const start = ndToLinearIndex(chunksPerShard, reducedKey)
           // write null chunk when 2^64-1 indicates fill value
           if (
             index[start * 2] === 18446744073709551615n &&
@@ -247,6 +244,16 @@ const zarr = (request) => {
       zipped.push(counts)
     }
     return product(zipped).map((name) => name.join(separator))
+  }
+
+  const ndToLinearIndex = (shape, index) => {
+    let stride = 1
+    let linearIndex = 0
+    for (let i = shape.length - 1; i >= 0; i--) {
+      linearIndex += index[i] * stride
+      stride *= shape[i]
+    }
+    return linearIndex
   }
 
   const constructors = {

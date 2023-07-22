@@ -244,7 +244,7 @@ a = asyncio.run(
 )
 a[:, :, :] = data
 
-# # 3d.chunked.compressed
+# 3d.chunked.compressed
 data = arange(64, dtype="i2").reshape(4, 4, 4)
 path = "3d.chunked.compressed.i2.zarr"
 a = asyncio.run(

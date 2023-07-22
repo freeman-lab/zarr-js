@@ -281,4 +281,43 @@ function run(zarr, prefix, mode) {
       }
     )
   })
+
+  test('3d.chunked.compressed.i2' + `.${mode}`, function (t) {
+    zarr.open(prefix + '3d.chunked.compressed.i2.zarr', (err, get) => {
+      t.plan(2)
+      get([0, 0, 0], (err, array) => {
+        t.deepEqual(array.data, new Int16Array([0, 1, 4, 5, 16, 17, 20, 21]))
+      })
+      get([1, 0, 1], (err, array) => {
+        t.deepEqual(
+          array.data,
+          new Int16Array([34, 35, 38, 39, 50, 51, 54, 55])
+        )
+      })
+    })
+  })
+
+  test('3d.chunked.compressed.sharded.i2' + `.${mode}`, function (t) {
+    zarr.open(prefix + '3d.chunked.compressed.sharded.i2.zarr', (err, get) => {
+      t.plan(6)
+      get([0, 0, 0], (err, array) => {
+        t.deepEqual(array.data, new Int16Array([0]))
+      })
+      get([1, 0, 1], (err, array) => {
+        t.deepEqual(array.data, new Int16Array([17]))
+      })
+      get([2, 0, 0], (err, array) => {
+        t.deepEqual(array.data, new Int16Array([32]))
+      })
+      get([1, 1, 1], (err, array) => {
+        t.deepEqual(array.data, new Int16Array([21]))
+      })
+      get([1, 3, 2], (err, array) => {
+        t.deepEqual(array.data, new Int16Array([30]))
+      })
+      get([3, 3, 3], (err, array) => {
+        t.deepEqual(array.data, new Int16Array([63]))
+      })
+    })
+  })
 }
