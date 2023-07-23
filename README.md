@@ -2,7 +2,7 @@
 
 > load chunked binary zarr files in javascript
 
-[zarr](https://zarr.readthedocs.io/en/stable/) is a chunked binary format for storing n-dimensional arrays with great support for parallel access in cloud environments. This is a minimal library purely for reading zarr files in Javascript. Other libraries exist with more features, and might suit you better! 
+[Zarr](https://zarr.readthedocs.io/en/stable/) is a chunked binary format for storing n-dimensional arrays with great support for parallel access in cloud environments. This is a minimal library purely for reading Zarr files in Javascript. Other libraries exist with more features, and might suit you better! 
 
 This library was originally developed for Zarr v2, but we've recently added experimental support for [Zarr v3](https://zarr-specs.readthedocs.io/en/latest/v3/core/v3.0.html), including support for [sharding](https://zarr-specs.readthedocs.io/en/latest/v3/codecs/sharding-indexed/v1.0.html), which is useful for visualization use cases. See "V3 support" below for more details.
 
