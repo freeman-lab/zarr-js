@@ -31,7 +31,7 @@ zarr.load('example.zarr', (err, array) => {
 >> Int16Array [ 1, 2, 3, 4 ]
 ```
 
-The `open` method can instead be used to read only the metadata and then load individual chunks on demand based on their key. This is useful in applications where you want to laziliy load chunks, e.g. tiles in a map viewer.
+The `open` method can instead be used to read only the metadata and then load individual chunks on demand based on their key. This is useful in applications where you want to load chunks laziliy, e.g. tiles in a map viewer.
 
 ```js
 const fs = require('fs/promises')
