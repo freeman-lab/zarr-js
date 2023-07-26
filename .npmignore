@@ -1,0 +1,6 @@
+node_modules
+test
+generate
+example.zarr
+example_group.zarr
+data
