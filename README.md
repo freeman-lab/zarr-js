@@ -2,9 +2,9 @@
 
 > load chunked binary zarr files in javascript
 
-[zarr](https://zarr.readthedocs.io/en/stable/) is a chunked binary format for storing n-dimensional arrays with great support for parallel access in cloud environments. This is a minimal library for reading zarr files in javascript. It supports reading arrays with `zlib` compression or no compression and `C` order little endian arrays. It supports both arrays and groups, and you can `load` entire arrays at once or `open` them for lazy loading of chunks. It returns [`scijs/ndarray`](https://github.com/scijs/ndarray) objects.
+[Zarr](https://zarr.readthedocs.io/en/stable/) is a chunked binary format for storing n-dimensional arrays with great support for parallel access in cloud environments. This is a minimal library purely for reading Zarr files in Javascript. Other libraries exist with more features, and might suit you better! 
 
-Another similar effort has been developing [here](https://github.com/gzuidhof/zarr.js)! It's more feature complete, supporting both reading and writing arrays, but it's also a heavier dependency. It might be better for your needs, check it out.
+This library was originally developed for Zarr v2, but we've recently added experimental support for [Zarr v3](https://zarr-specs.readthedocs.io/en/latest/v3/core/v3.0.html), including support for [sharding](https://zarr-specs.readthedocs.io/en/latest/v3/codecs/sharding-indexed/v1.0.html), which is useful for visualization use cases. See "V3 support" below for more details.
 
 ## install
 
@@ -31,7 +31,7 @@ zarr.load('example.zarr', (err, array) => {
 >> Int16Array [ 1, 2, 3, 4 ]
 ```
 
-The `open` method can instead be used to read only the metadata and then load individual chunks on demand. This is useful in applications where you want to laziliy load chunks, e.g. tiles in a map viewer.
+The `open` method can instead be used to read only the metadata and then load individual chunks on demand based on their key. This is useful in applications where you want to load chunks laziliy, e.g. tiles in a map viewer.
 
 ```js
 const fs = require('fs/promises')
@@ -61,9 +61,23 @@ zarr.loadGroup('example_group.zarr', (err, group) => {
 >> Int16Array [ 5, 6, 7, 8 ]
 ```
 
+## v3 support
+
+We recently added experimental support for [Zarr v3](https://zarr.readthedocs.io/en/stable/spec/v3.html), including support for sharding, which makes it possible to define chunks that are smaller than their containing storage objects via [sharding](https://zarr-specs.readthedocs.io/en/latest/v3/codecs/sharding-indexed/v1.0.html). This can be especially useful in visualization applications where you want to load small portions of data on demand without creating an excessive number of files.
+
+To use v3 specify the optional version tag `'v3'` (the default is `'v2'`)
+
+```js
+const zarr = require('zarr-js')(window.fetch, 'v3')
+```
+
+Currently, the only supported method is `zarr.open`, which reads the metadata and then can load individual chunks on demand via the `get` method. For non-sharded data, this should behave similarly to Zarr v2. For sharded data, the `key` argument to the `get` method uses byte range requests to load chunks from within shards.
+
+Here's a simple worked example. For a non-sharded 4x4 array with 2x2 chunks, calling `get([0,0])` will return a 2x2 array with the entries `[0:2,0:2]` from the original array. For a sharded 4x4 array with 2x2 shards and 1x1 chunks, calling `get([0,0])` will return a 1x1 array with the entries `[0:1,0:1]` from the original array.
+
 ## api
 
-There are just four methods
+This documentation is for the v2 version only (for the v3 version only the `open` method is supported).
 
 #### `zarr.load(uri, [callback], [metadata])`
 
@@ -80,6 +94,7 @@ Loads all arrays with consolidated metadata from a zarr group, which is typicall
 #### `zarr.openGroup(uri, [callback], [list], [metadata])`
 
 Opens consolidated metadata for a zarr group, which is typically a collection of related arrays. Only the metadata is loaded, so this is useful when lazily loading chunks from multiple sources. The result passed to the `callback` is an object with keys as array names and values as functions that can be used to load chunks. An optional list of array names can be passed if you only want to return a subset of keys. If metadata has already been loaded, it can be passed as an optional fourth argument to avoid making the request.
+
 
 ## tests
 
