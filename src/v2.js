@@ -1,4 +1,4 @@
-const { unzlibSync } = require('fflate')
+const { gunzipSync, unzlibSync } = require('fflate')
 const ndarray = require('ndarray')
 const ops = require('ndarray-ops')
 const { parallel } = require('async')
@@ -187,6 +187,8 @@ const zarr = (request) => {
       if (metadata.compressor) {
         if (metadata.compressor.id === 'zlib') {
           chunk = unzlibSync(chunk)
+        } else if (metadata.compressor.id === 'gzip') {
+          chunk = gunzipSync(chunk)
         } else {
           throw new Error(
             'compressor ' + metadata.compressor.id + ' is not supported'
