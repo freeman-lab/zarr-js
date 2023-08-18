@@ -1,7 +1,7 @@
 const test = require('tape')
 const fs = require('fs/promises')
 const fetch = require('node-fetch')
-const zarrLocal = require('../index')(fetch, 'v3')
+const zarrLocal = require('../index')(fetch, 'v3', {useSuffixRequest: false})
 const zarrRemote = require('../index')(fetch, 'v3')
 
 const args = process.argv

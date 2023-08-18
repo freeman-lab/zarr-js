@@ -5,7 +5,13 @@ const { parallel } = require('async')
 const pool = require('ndarray-scratch')
 const product = require('cartesian-product')
 
-const zarr = (request) => {
+const zarr = (request, config = {}) => {
+
+  let useSuffixRequest = true
+  if (config.hasOwnProperty('useSuffixRequest')) {
+    useSuffixRequest = config.useSuffixRequest
+  }
+
   if (!request) {
     request = window.fetch
   }
@@ -113,7 +119,7 @@ const zarr = (request) => {
         const src = path + '/c/' + key
         const checksumSize = 4
         const indexSize =
-          16 * chunksPerShard.reduce((a, b) => a * b, 1) + checksumSize
+          16 * chunksPerShard.reduce((a, b) => a * b, 1)
         if (!keys.includes(key))
           return cb(new Error('storage key ' + key + ' not found', null))
 
@@ -164,29 +170,47 @@ const zarr = (request) => {
         if (indexCache[key]) {
           getUsingIndex(indexCache[key])
         } else {
-          request(src, { method: 'HEAD' }).then((res) => {
-            const contentLength = res.headers.get('Content-Length')
-            if (contentLength) {
-              const fileSize = Number(contentLength)
-              // get index byte range according to sharding spec
-              const startRange = fileSize - indexSize
-              loader(
-                src,
-                {
-                  headers: {
-                    Range: `bytes=${startRange}-${fileSize - checksumSize - 1}`,
-                  },
+          if (useSuffixRequest) { 
+            loader(
+              src,
+              {
+                headers: {
+                  Range: `bytes=-${indexSize + checksumSize}`,
                 },
-                'arraybuffer',
-                (err, res) => {
-                  if (err) return cb(err)
-                  const index = new BigUint64Array(Buffer.from(res).buffer)
-                  indexCache[key] = index
-                  getUsingIndex(indexCache[key])
-                }
-              )
-            }
-          })
+              },
+              'arraybuffer',
+              (err, res) => {
+                if (err) return cb(err)
+                const index = new BigUint64Array(new Buffer.from(res).buffer.slice(0, indexSize))
+                indexCache[key] = index
+                getUsingIndex(indexCache[key])
+              }
+            )
+          } else {
+            request(src, { method: 'HEAD' }).then((res) => {
+              const contentLength = res.headers.get('Content-Length')
+              if (contentLength) {
+                const fileSize = Number(contentLength)
+                // get index byte range according to sharding spec
+                const startRange = fileSize - (indexSize + checksumSize)
+                loader(
+                  src,
+                  {
+                    headers: {
+                      Range: `bytes=${startRange}-${fileSize - checksumSize - 1}`,
+                    },
+                  },
+                  'arraybuffer',
+                  (err, res) => {
+                    if (err) return cb(err)
+                    const index = new BigUint64Array(Buffer.from(res).buffer)
+                    indexCache[key] = index
+                    getUsingIndex(indexCache[key])
+                  }
+                )
+              }
+            })
+          }
         }
       }
 

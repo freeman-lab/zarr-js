@@ -75,6 +75,8 @@ Currently, the only supported method is `zarr.open`, which reads the metadata an
 
 Here's a simple worked example. For a non-sharded 4x4 array with 2x2 chunks, calling `get([0,0])` will return a 2x2 array with the entries `[0:2,0:2]` from the original array. For a sharded 4x4 array with 2x2 shards and 1x1 chunks, calling `get([0,0])` will return a 1x1 array with the entries `[0:1,0:1]` from the original array.
 
+You can additionally pass a configuration object for some v3 specific configuration. Current options include `useSuffixRequest` which is `true` by default and will use a suffix request to get the shard index instead of using a sequence of a HEAD request to get file size and then a byte range request. Most large object stores (e.g. S3, GCS, Azure) support suffix requests, but you may need to turn it off for other http servers.
+
 ## api
 
 This documentation is for the v2 version only (for the v3 version only the `open` method is supported).
