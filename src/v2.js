@@ -43,7 +43,7 @@ const zarr = (request) => {
         type === 'arraybuffer' &&
         response &&
         response.status &&
-        response.status === 404
+        [403, 404].includes(response.status)
       ) {
         return cb(null, null)
       } else {
